@@ -3,7 +3,6 @@ const {
   fetchKantoPokemon,
   evYieldoptions,
   chooseinitoptions,
-  findMinMaxLevels,
   evYieldPopup,
   getMinMaxPokemonLevel,
 } = require("./controller");
@@ -65,7 +64,7 @@ function callbackQuery(bot, query) {
       break;
     }
     case 'battle' : {
-        getMinMaxPokemonLevel(bot , query)
+        getMinMaxPokemonLevel(query)
         break
     }
     default : {

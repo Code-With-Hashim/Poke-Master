@@ -109,59 +109,20 @@ function evYieldPopup(bot, query) {
 }
 // Use the answerCallbackQuery method to display the modal with a white background
 
-async function getMinMaxPokemonLevel(bot, query) {
-  const pokeName = query.data.split(" ")[1];
+async function getMinMaxPokemonLevel(query) {
+  // console.log(query)
+  // const pokeName = query.data.split(" ")[1];
 
-  const pokeUrl = await axios.get(
-    `https://pokeapi.co/api/v2/pokemon/${pokeName}`
-  );
-  const speciesUrl = await axios.get(pokeUrl.data.species.url);
+  // const pokeUrl = await axios.get(
+  //   `https://pokeapi.co/api/v2/pokemon/${pokeName}`
+  // );
+  // const speciesUrl = await axios.get(pokeUrl.data.species.url);
 
-  const url = speciesUrl.data.evolution_chain.url;
+  // const url = speciesUrl.data.evolution_chain.url;
 
-  try {
-    const evolution_chain = await axios.get(url);
-  let min_level = 0;
-  let max_level = 0;
-
-if (evolution_chain.data.chain.evolves_to.length !== 0) {
-      
-      
-      
-      if (evolution_chain.data.chain.species.name === pokeName) {
-        min_level = 0;
-        max_level = evolution_chain.data.chain.evolves_to[0].evolution_details[0].min_level
-        
-        if(max_level === null) {
-          max = 24
-        }
-        
-
-        
-        console.log(min_level , max_level)// return {min_level , max_level
-      } else if (evolution_chain.data.chain.evolves_to[0].species.name  == pokeName) {
-        
-        
-        min_level = evolution_chain.data.chain.evolves_to[0].evolution_details[0].min_level
-        max_level = evolution_chain.data.chain.evolves_to[0].evolves_to[0].evolution_details[0].min_level
-        
-
-        // return {min_level , max_level}
-        console.log(min_level, max_level);
-      } else {
-        min_level = evolution_chain.data.chain.evolves_to[0].evolves_to[0].evolution_details[0].min_level
-        max_level = 74;
-
-        // return {min_level , max_level}
-        console.log(min_level, max_level);
-      }
- 
-
-
-   }
-  } catch (error) {
-    console.log(error);
-  }
+  // console.log(url)
+  
+  
 }
 module.exports = {
   fetchKantoPokemon,
