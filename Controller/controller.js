@@ -1,5 +1,3 @@
-const Pokedex = require("pokeapi-js-wrapper");
-const P = new Pokedex.Pokedex({ cache: false });
 const axios = require("axios");
 
 async function fetchKantoPokemon(random) {
@@ -66,9 +64,9 @@ const chooseinitoptions = {
   reply_markup: {
     inline_keyboard: [
       [
-        { text: "Charmender", callback_data: "charmender" },
-        { text: "Bulbasaur", callback_data: `bulbasaur` },
-        { text: "Squirtal", callback_data: "squirtal" },
+        { text: "Charmander", callback_data: "choosePokemon charmander" },
+        { text: "Bulbasaur", callback_data: `choosePokemon bulbasaur` },
+        { text: "Squirtal", callback_data: "choosePokemon squirtal" },
       ],
     ],
   },
@@ -109,21 +107,104 @@ function evYieldPopup(bot, query) {
 }
 // Use the answerCallbackQuery method to display the modal with a white background
 
-async function getMinMaxPokemonLevel(query) {
-  // console.log(query)
-  // const pokeName = query.data.split(" ")[1];
+async function getMinMaxPokemonLevel(pokemonNameOrId) {
+  try {
+    const response = await axios.get(
+      `https://pokeapi.co/api/v2/pokemon-species/${pokemonNameOrId}/`
+    );
+    const evolutionChainResponse = await axios.get(
+      response.data.evolution_chain.url
+    );
+    const evolutionChain = evolutionChainResponse.data.chain;
 
-  // const pokeUrl = await axios.get(
-  //   `https://pokeapi.co/api/v2/pokemon/${pokeName}`
-  // );
-  // const speciesUrl = await axios.get(pokeUrl.data.species.url);
+    let minLevel = 1;
+    let maxLevel = 100;
 
-  // const url = speciesUrl.data.evolution_chain.url;
+    if (evolutionChain.evolves_to.length !== 0) {
+      if (evolutionChain.species.name === pokemonNameOrId) {
+        // console.log(evolutionChain.evolves_to[0])
+        maxLevel = evolutionChain.evolves_to[0].evolution_details[0].min_level;
 
-  // console.log(url)
+        // console.log(evolutionChain.evolves_to[0].evolution_details[0].min_level)
+
+        if (maxLevel === null) {
+          maxLevel = 24;
+        }
+      } else if (
+        evolutionChain.evolves_to[0].species.name === pokemonNameOrId
+      ) {
+        minLevel = evolutionChain.evolves_to[0].evolution_details[0].min_level;
+
+        if (minLevel === null) {
+          minLevel = 25;
+        }
+
+        if (evolutionChain.evolves_to[0].length !== 0) {
+          // console.log(evolutionChain.evolves_to[0].evolves_to);
+
+          if (evolutionChain.evolves_to[0].evolves_to.length !== 0) {
+            maxLevel =
+              evolutionChain.evolves_to[0].evolves_to[0].evolution_details[0]
+                .min_level;
+          } else {
+            maxLevel = 45;
+          }
+        } else {
+          maxLevel = 45;
+        }
+
+        if (maxLevel === null) {
+          maxLevel = 55;
+        }
+      } else {
+        if (evolutionChain.evolves_to[0].evolves_to.length !== 0) {
+          if (evolutionChain.evolves_to[0].evolves_to[0].length !== 0) {
+            minLevel =
+              evolutionChain.evolves_to[0].evolves_to[0].evolution_details[0]
+                .min_level;
+            maxLevel = 75;
+
+            if (minLevel === null) {
+              minLevel = 46;
+            }
+          } else {
+            minLevel = 46;
+            maxLevel = 75;
+          }
+        } else {
+          (minLevel = 35), (maxLevel = 50);
+        }
+
+        // console.log()
+      }
+    } else {
+      maxLevel = 24;
+    }
+    
+    const randomLevel = getRandomLevel(minLevel , maxLevel)
+    
+    return randomLevel
+    
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function getRandomLevel(minLevel , maxLevel) {
   
+  const range = maxLevel - minLevel + 1
+  
+  const randomLevel = Math.floor(Math.random() * range) + minLevel
+  
+  return randomLevel
   
 }
+
+
+
+
+
+
 module.exports = {
   fetchKantoPokemon,
   evYieldoptions,
