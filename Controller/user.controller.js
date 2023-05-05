@@ -356,13 +356,14 @@ async function getExperience(level, pokeName) {
 async function getInventory(bot , msg , match) {
    
      const chatId = msg.chat.id
+     const userId = msg.from.id
     
     try {
         
-      const {pokeDollars , pokeBalls} = await userInvModal.findOne({owner : chatId})
+      const {pokeDollars, pokeBalls} = await userInvModal.findOne({owner : userId})
   
   
-  let message = `Poke Dollars 💵: ${pokeDollars}
+  let message = `<b>Poke Dollars 💵: ${pokeDollars}</b>
   
 `;
   
@@ -380,15 +381,16 @@ async function getInventory(bot , msg , match) {
   const keyboard = {
   inline_keyboard: [
     [
-      { text: "Mega Stones", callback_data: "megastones" },
-      { text: "TM", callback_data: "tm" }
+      { text: "Mega Stones", callback_data: "mymegastones" },
+      { text: "TM", callback_data: "mytm" }
     ]
   ]
 };
 
 bot.sendMessage(chatId , message , {
    reply_to_message_id: msg.message_id,
-   reply_markup : keyboard
+   reply_markup : keyboard,
+   parse_mode : 'HTML'
 })
 }
 catch(err) {
