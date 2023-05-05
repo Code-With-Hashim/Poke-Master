@@ -1,21 +1,25 @@
 const { userInvModal } = require("../model/userInventory");
 
 async function megaStones(bot, query) {
-  console.log(query);
   const chatId = query.message.chat.id;
+  const userId = query.from.id
+  let loading = true
+  
+  // console.log(userId)
+  
 
 
   // bot.editMessageText("Not equipped", { chat_id: chat_id, message_id: message_id });
   // bot.editMessageReplyMarkup({ inline_keyboard: [] }, { chat_id: chat_id, message_id: message_id });
 
-    const { megaStones, megaRingisEquipped } = await userInvModal.findOne({
-      owner: chatId,
+    const { megaRingisEquipped } = await userInvModal.findOne({
+      owner: userId,
     });
 
     // console.log(megaRingisEquipped)
 
     // console.log(query)
-    bot.editMessageText(
+   await bot.editMessageText(
       `<b>Mega Ring</b>: ${!megaRingisEquipped ? "Not Equipeed" : "Equipped"}`,
       {
         chat_id: chatId,
@@ -23,11 +27,11 @@ async function megaStones(bot, query) {
         parse_mode: "HTML",
       }
     );
-    bot.editMessageReplyMarkup(
+   await bot.editMessageReplyMarkup(
       { inline_keyboard:  [
     [
-      { text: "Inventory", callback_data: "inventory" },
-      { text: "TM", callback_data: "tm" },
+      { text: "Inventory", callback_data: "myinventory" },
+      { text: "TM", callback_data: "mytm" },
     ],
   ]},
       {
@@ -39,11 +43,14 @@ async function megaStones(bot, query) {
 
 async function inventory(bot, query) {
   const chatId = query.message.chat.id;
+      const userId = query.from.id
+
+
     
     const { pokeDollars, pokeBalls } = await userInvModal.findOne({
-      owner: chatId,
+      owner: userId,
     });
-     let message = `Poke Dollars 💵: ${pokeDollars}
+     let message = `<b>Poke Dollars 💵: ${pokeDollars}</b>
   
 `;
   
@@ -58,7 +65,8 @@ async function inventory(bot, query) {
     
   }
     
-    bot.editMessageText(
+    
+   await bot.editMessageText(
       message,
       {
         chat_id: chatId,
@@ -66,11 +74,11 @@ async function inventory(bot, query) {
         parse_mode: "HTML",
       }
     );
-    bot.editMessageReplyMarkup(
+   await bot.editMessageReplyMarkup(
       { inline_keyboard: [
     [
-      { text: "Mega Stones", callback_data: "megastones" },
-      { text: "TM", callback_data: "tm" },
+      { text: "Mega Stones", callback_data: "mymegastones" },
+      { text: "TM", callback_data: "mytm" },
     ],
   ] },
       {
@@ -82,19 +90,23 @@ async function inventory(bot, query) {
 
 async function TM(bot, query) {
   const chatId = query.message.chat.id;
+    const userId = query.from.id
 
-    const { TMs } = await userInvModal.findOne({ owner: chatId });
+try {
+  
+  
+    const { TMs } = await userInvModal.findOne({ owner: userId });
 
-    bot.editMessageText(`<b>TM's 💿</b>:`, {
+    await bot.editMessageText(`<b>TM's 💿</b>:`, {
       chat_id: chatId,
       message_id: query.message.message_id,
       parse_mode: "HTML",
     });
-    bot.editMessageReplyMarkup(
+    await bot.editMessageReplyMarkup(
       { inline_keyboard: [
     [
-      { text: "Inventory", callback_data: "inventory" },
-      { text: "Mega Stones", callback_data: "megastones" },
+      { text: "Inventory", callback_data: "myinventory" },
+      { text: "Mega Stones", callback_data: "mymegastones" },
     ]
   ] },
       {
@@ -102,6 +114,13 @@ async function TM(bot, query) {
         message_id: query.message.message_id,
       }
     )
+  
+}
+ catch(err)  {
+   console.log(err)
+ }
+  
+
 }
 
 module.exports = { megaStones, inventory, TM };

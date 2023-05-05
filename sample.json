@@ -1,81 +1,254 @@
-{
-    "baby_trigger_item": null,
-    "chain": {
-        "evolution_details": [],
-        "evolves_to": [
-            {
-                "evolution_details": [
-                    {
-                        "gender": null,
-                        "held_item": null,
-                        "item": null,
-                        "known_move": null,
-                        "known_move_type": null,
-                        "location": null,
-                        "min_affection": null,
-                        "min_beauty": null,
-                        "min_happiness": null,
-                        "min_level": 16,
-                        "needs_overworld_rain": false,
-                        "party_species": null,
-                        "party_type": null,
-                        "relative_physical_stats": null,
-                        "time_of_day": "",
-                        "trade_species": null,
-                        "trigger": {
-                            "name": "level-up",
-                            "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
-                        },
-                        "turn_upside_down": false
-                    }
-                ],
-                "evolves_to": [
-                    {
-                        "evolution_details": [
-                            {
-                                "gender": null,
-                                "held_item": null,
-                                "item": null,
-                                "known_move": null,
-                                "known_move_type": null,
-                                "location": null,
-                                "min_affection": null,
-                                "min_beauty": null,
-                                "min_happiness": null,
-                                "min_level": 36,
-                                "needs_overworld_rain": false,
-                                "party_species": null,
-                                "party_type": null,
-                                "relative_physical_stats": null,
-                                "time_of_day": "",
-                                "trade_species": null,
-                                "trigger": {
-                                    "name": "level-up",
-                                    "url": "https://pokeapi.co/api/v2/evolution-trigger/1/"
-                                },
-                                "turn_upside_down": false
-                            }
-                        ],
-                        "evolves_to": [],
-                        "is_baby": false,
-                        "species": {
-                            "name": "charizard",
-                            "url": "https://pokeapi.co/api/v2/pokemon-species/6/"
-                        }
-                    }
-                ],
-                "is_baby": false,
-                "species": {
-                    "name": "charmeleon",
-                    "url": "https://pokeapi.co/api/v2/pokemon-species/5/"
-                }
-            }
-        ],
-        "is_baby": false,
-        "species": {
-            "name": "charmander",
-            "url": "https://pokeapi.co/api/v2/pokemon-species/4/"
-        }
-    },
-    "id": 2
-}
+// mega stone json format
+
+[
+  {
+    "name": "Abomasite",
+    "price": 12000,
+    "pokemon": ["Abomasnow"]
+  },
+  {
+    "name": "Absolite",
+    "price": 10000,
+    "pokemon": ["Absol"]
+  },
+  {
+    "name": "Aerodactylite",
+    "price": 15000,
+    "pokemon": ["Aerodactyl"]
+  },
+  {
+    "name": "Aggronite",
+    "price": 20000,
+    "pokemon": ["Aggron"]
+  },
+  {
+    "name": "Alakazite",
+    "price": 18000,
+    "pokemon": ["Alakazam"]
+  },
+  {
+    "name": "Altarianite",
+    "price": 16000,
+    "pokemon": ["Altaria"]
+  },
+  {
+    "name": "Ampharosite",
+    "price": 17000,
+    "pokemon": ["Ampharos"]
+  },
+  {
+    "name": "Audinite",
+    "price": 22000,
+    "pokemon": ["Audino"]
+  },
+  {
+    "name": "Banettite",
+    "price": 11000,
+    "pokemon": ["Banette"]
+  },
+  {
+    "name": "Beedrillite",
+    "price": 13000,
+    "pokemon": ["Beedrill"]
+  },
+  {
+    "name": "Blastoisinite",
+    "price": 25000,
+    "pokemon": ["Blastoise"]
+  },
+  {
+    "name": "Blazikenite",
+    "price": 30000,
+    "pokemon": ["Blaziken"]
+  },
+  {
+    "name": "Cameruptite",
+    "price": 19000,
+    "pokemon": ["Camerupt"]
+  },
+  {
+    "name": "Charizardite X",
+    "price": 28000,
+    "pokemon": ["Charizard"]
+  },
+  {
+    "name": "Charizardite Y",
+    "price": 28000,
+    "pokemon": ["Charizard"]
+  },
+  {
+    "name": "Diancite",
+    "price": 40000,
+    "pokemon": ["Diancie"]
+  },
+  {
+    "name": "Galladite",
+    "price": 22000,
+    "pokemon": ["Gallade"]
+  },
+  {
+    "name": "Garchompite",
+    "price": 25000,
+    "pokemon": ["Garchomp"]
+  },
+  {
+    "name": "Gardevoirite",
+    "price": 22000,
+    "pokemon": ["Gardevoir"]
+  },
+  {
+    "name": "Gengarite",
+    "price": 20000,
+    "pokemon": ["Gengar"]
+  },
+  {
+    "name": "Glalitite",
+    "price": 20000,
+    "pokemon": ["Glalie"]
+  },
+  {
+    "name": "Gyaradosite",
+    "price": 22000,
+    "pokemon": ["Gyarados"]
+  },
+  {
+    "name": "Heracronite",
+    "price": 17000,
+    "pokemon": ["Heracross"]
+  },
+  {
+    "name": "Houndoominite",
+    "pokemon": "Houndoom",
+    "price": 18000
+  },
+  {
+    "name": "Kangaskhanite",
+    "pokemon": "Kangaskhan",
+    "price": 15000
+  },
+  {
+    "name": "Latiasite",
+    "pokemon": "Latias",
+    "price": 23000
+  },
+  {
+    "name": "Latiosite",
+    "pokemon": "Latios",
+    "price": 23000
+  },
+  {
+    "name": "Lopunnite",
+    "pokemon": "Lopunny",
+    "price": 20000
+  },
+  {
+    "name": "Lucarionite",
+    "pokemon": "Lucario",
+    "price": 22000
+  },
+  {
+    "name": "Manectite",
+    "pokemon": "Manectric",
+    "price": 18000
+  },
+  {
+    "name": "Mawilite",
+    "pokemon": "Mawile",
+    "price": 15000
+  },
+  {
+    "name": "Medichamite",
+    "pokemon": "Medicham",
+    "price": 20000
+  },
+  {
+    "name": "Metagrossite",
+    "pokemon": "Metagross",
+    "price": 25000
+  },
+  {
+    "name": "Mewtwonite X",
+    "pokemon": "Mewtwo",
+    "price": 30000
+  },
+  {
+    "name": "Mewtwonite Y",
+    "pokemon": "Mewtwo",
+    "price": 30000
+  },
+  {
+    "name": "Pidgeotite",
+    "pokemon": "Pidgeot",
+    "price": 19000
+  },
+  {
+    "name": "Pinsirite",
+    "pokemon": "Pinsir",
+    "price": 16000
+  },
+  {
+    "name": "Salamencite",
+    "pokemon": "Salamence",
+    "price": 22000
+  },
+  {
+    "name": "Sceptilite",
+    "pokemon": "Sceptile",
+    "price": 20000
+  },
+  {
+    "name": "Scizorite",
+    "pokemon": "Scizor",
+    "price": 20000
+  },
+  {
+    "name": "Sharpedonite",
+    "pokemon": "Sharpedo",
+    "price": 18000
+  },
+  {
+    "name": "Slowbronite",
+    "pokemon": "Slowbro",
+    "price": 18000
+  },
+  {
+    "name": "Steelixite",
+    "pokemon": "Steelix",
+    "price": 20000
+  },
+  {
+    "name": "Swampertite",
+    "pokemon": "Swampert",
+    "price": 20000
+  },
+  {
+    "name": "Tyranitarite",
+    "pokemon": "Tyranitar",
+    "price": 25000
+  },
+  {
+    "name": "Venusaurite",
+    "pokemon": "Venusaur",
+    "price": 20000
+  },
+  {
+    "name": "Wigglytuffite",
+    "pokemon": ["Wigglytuff"],
+    "price": 20000
+  },
+  {
+    "name": "Xerneasite",
+    "pokemon": ["Xerneas"],
+    "price": 25000
+  },
+  {
+    "name": "Yveltalite",
+    "pokemon": ["Yveltal"],
+    "price": 25500
+  },
+  {
+    "name": "Zapdosite",
+    "pokemon": ["Zapdos"],
+    "price": 20000
+  }
+]
