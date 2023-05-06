@@ -10,6 +10,7 @@ const token = "6235641191:AAEgYT5jZMy9cfIL-ZK-clM58-ffT0LchtA";
 
 const bot = new TelegramBot(token, { polling: true });
 
+
 bot.onText(/\/start/, (msg , match) => startCommand(bot , msg , match));
 
 
@@ -31,7 +32,6 @@ async function DatabaseRun() {
      console.log('Database Connected Successfully')
    }
    catch(err) {
-     console.log(err)
    }
 }
 
