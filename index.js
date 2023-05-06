@@ -4,6 +4,7 @@ const { startCommand, huntCommand, callbackQuery, myInvCommand } = require("./Co
 const { connect } = require("./config/db.config");
 const PokeMart = require("./model/pokeStore.model");
 const { pokeStoreCommand } = require("./Controller/pokeStore.controller");
+const { userBuyCommand } = require("./Controller/userBuyGive.controller");
 
 const token = "6235641191:AAEgYT5jZMy9cfIL-ZK-clM58-ffT0LchtA";
 
@@ -18,6 +19,8 @@ bot.onText(/\/hunt/, (msg, match) => huntCommand(bot , msg , match));
 bot.onText(/\/myinventory/ , (msg , match) => myInvCommand(bot , msg , match) )
 
 bot.onText(/\/pokestore/ , (msg) => pokeStoreCommand(bot , msg))
+
+bot.onText(/\/buy (.+) (.+)/ , (msg , match) => userBuyCommand(bot , msg , match))
 
 bot.on("callback_query", (query) => callbackQuery(bot , query));
 

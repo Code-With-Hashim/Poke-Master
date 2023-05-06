@@ -5,17 +5,17 @@ const { userPokeModal } = require("../model/userPoke");
 
 const starterPack = [
     {
-      name : "regular ball",
+      name : "regular balls",
       defaultName : 'regular-ball',
       stock : 3
     },
     {
-      name : "great ball",
+      name : "great balls",
       defaultName : 'great-ball',
       stock : 1
     },
     {
-      name : "ultra ball",
+      name : "ultra balls",
       defaultName : 'ultra-ball',
       stock : 1
     },

@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 
 const pokeBallSchema = new mongoose.Schema({
   name : {type : String , required : true},
-  defaultName : {type : String , required : true},
   stock : {type : Number , required : true},
 })
 

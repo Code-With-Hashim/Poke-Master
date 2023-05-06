@@ -1,5 +1,4 @@
 const { userModel } = require("../model/userDetail");
-const { userInvModal } = require("../model/userInventory");
 const { megaStones, inventory, TM } = require("./callbackQuery.controller");
 const {
   fetchKantoPokemon,
@@ -8,6 +7,7 @@ const {
   evYieldPopup,
   getMinMaxPokemonLevel,
 } = require("./controller");
+const { pokeStoreItems, pokeBalls, pokeMegaStore } = require("./pokeStore.controller");
 const { choosePokemon, getInventory } = require("./user.controller");
 
 async function startCommand(bot, msg, match) {
@@ -120,6 +120,14 @@ function callbackQuery(bot, query) {
     }
     case 'items' : {
       pokeStoreItems(bot , query)
+      break
+    }
+    case 'pokeballs' : {
+      pokeBalls(bot , query)
+      break
+    }
+    case 'megastones' : {
+      pokeMegaStore(bot , query)
       break
     }
     default: {
