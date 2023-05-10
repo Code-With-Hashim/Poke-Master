@@ -4,22 +4,22 @@ const { userInvModal } = require("../model/userInventory");
 const { userPokeModal } = require("../model/userPoke");
 
 const starterPack = [
-    {
-      name : "regular ball",
-      defaultName : 'regular-ball',
-      stock : 3
-    },
-    {
-      name : "great ball",
-      defaultName : 'great-ball',
-      stock : 1
-    },
-    {
-      name : "ultra ball",
-      defaultName : 'ultra-ball',
-      stock : 1
-    },
-  ]
+  {
+    name: "regular balls",
+    defaultName: "regular-ball",
+    stock: 3,
+  },
+  {
+    name: "great balls",
+    defaultName: "great-ball",
+    stock: 1,
+  },
+  {
+    name: "ultra balls",
+    defaultName: "ultra-ball",
+    stock: 1,
+  },
+];
 
 async function choosePokemon(bot, query) {
   const pokemonName = query.data.trim().split(" ")[1];
@@ -44,12 +44,11 @@ async function choosePokemon(bot, query) {
     const pokeIVs = generateIVs();
     const pokeExp = await getExperience(pokeLvl, pokemonName);
     const trainer = await query.message.chat.id;
-    
-     const data = await userInvModal.create({
-          owner : chatId,
-          pokeBalls : starterPack
-        })
-        
+
+    const data = await userInvModal.create({
+      owner: chatId,
+      pokeBalls: starterPack,
+    });
 
     const isDataEntrySucceed = await userPokeModal.create({
       name: pokemonName,
@@ -68,7 +67,7 @@ async function choosePokemon(bot, query) {
       const userPokeId = isDataEntrySucceed._id;
       const prevPokeName =
         pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1);
-       
+
       bot
         .sendMessage(
           query.message.chat.id,
@@ -171,17 +170,23 @@ async function getMoves(moves, pokeLvl) {
               name: move_name,
               power,
               accuracy,
+              type : name
             });
           }
           break;
         }
       }
     }
+    while(moves_name.length > 4) {
+      moves_name.shift()
+    } 
+  return moves_name;
+  
+    console.log(moves)
   } catch (error) {
     console.log(error);
   }
 
-  return moves_name;
 }
 
 async function getAbilites(ability) {
@@ -353,51 +358,82 @@ async function getExperience(level, pokeName) {
   }
 }
 
-async function getInventory(bot , msg , match) {
-   
-     const chatId = msg.chat.id
-     const userId = msg.from.id
-    
-    try {
-        
-      const {pokeDollars, pokeBalls} = await userInvModal.findOne({owner : userId})
-  
-  
-  let message = `<b>Poke Dollars 💵: ${pokeDollars}</b>
+async function getInventory(bot, msg, match) {
+  const chatId = msg.chat.id;
+  const userId = msg.from.id;
+
+  try {
+    const { pokeDollars, pokeBalls, pokeItems } = await userInvModal.findOne({
+      owner: userId,
+    });
+
+    let message = `<b>Poke Dollars 💵: ${pokeDollars}</b>
   
 `;
-  
-  for (let i=0; i<pokeBalls.length; i++) {
-    let [firstName , secondName] = pokeBalls[i].name.split(" ")
-    firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1)
-    secondName = secondName.charAt(0).toUpperCase() + secondName.slice(1)
-    
-    const name = `${firstName} ${secondName}`
-    
-    message+=`${name}: ${pokeBalls[i].stock} \n`
-    
+
+    for (let i = 0; i < pokeBalls.length; i++) {
+      let [firstName, secondName] = pokeBalls[i].name.split(" ");
+      firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+      secondName = secondName.charAt(0).toUpperCase() + secondName.slice(1);
+
+      const name = `${firstName} ${secondName}`;
+
+      message += `${name}: ${pokeBalls[i].stock} \n`;
+    }
+
+    if (pokeItems.length !== 0) {
+      message += `<b>————————————</b>\n<b>Items</b>:\n\n`;
+      pokeItems.forEach((userItem) => {
+        let [firstName, secondName] = userItem.name.split(" ");
+        firstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+
+        if (secondName !== undefined) {
+          secondName = secondName.charAt(0).toUpperCase() + secondName.slice(1);
+        }
+
+        const name = `${firstName} ${
+          secondName !== undefined ? secondName : ""
+        }`;
+
+        message += `${name.trim()}: ${userItem.stock} \n`;
+      });
+    }
+
+    const keyboard = {
+      inline_keyboard: [
+        [
+          { text: "Mega Stones", callback_data: "mymegastones" },
+          { text: "TM", callback_data: "mytm" },
+        ],
+      ],
+    };
+
+    bot.sendMessage(chatId, message, {
+      reply_to_message_id: msg.message_id,
+      reply_markup: keyboard,
+      parse_mode: "HTML",
+    });
+  } catch (err) {
+    console.log(err);
   }
-  
-  const keyboard = {
-  inline_keyboard: [
-    [
-      { text: "Mega Stones", callback_data: "mymegastones" },
-      { text: "TM", callback_data: "mytm" }
-    ]
-  ]
+}
+
+module.exports = {
+  choosePokemon,
+  getInventory,
+  getTypes,
+  getMoves,
+  getAbilites,
+  getBaseStats,
+  generateIVs,
+  generateNat,
+  getExperience
 };
 
-bot.sendMessage(chatId , message , {
-   reply_to_message_id: msg.message_id,
-   reply_markup : keyboard,
-   parse_mode : 'HTML'
-})
-}
-catch(err) {
-    console.log(err)
-}
-}
-
-
-
-module.exports = { choosePokemon , getInventory };
+// const pokeTypes = getTypes(types);
+//     const pokeMoves = await getMoves(moves, pokeLvl);
+//     const pokeAbilities = await getAbilites(abilities);
+//     const pokeBaseStats = getBaseStats(stats);
+//     const pokeNat = await generateNat();
+//     const pokeIVs = generateIVs();
+//     const pokeExp = await getExperience(pokeLvl, pokemonName);
