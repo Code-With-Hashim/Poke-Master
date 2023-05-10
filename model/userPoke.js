@@ -4,6 +4,7 @@ const MoveSchema = new mongoose.Schema({
   name: { type: String, required: true },
   power: { type: Number, required: true },
   accuracy: { type: Number, required: true },
+  type : {type : String , required : true}
 });
 
 const userPokeSchema = new mongoose.Schema({

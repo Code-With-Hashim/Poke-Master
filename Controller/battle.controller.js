@@ -34,8 +34,11 @@ async function battle(bot, query) {
     `https://pokeapi.co/api/v2/pokemon/${pokemonName}`
   );
   
-  getOpponentPokemon(pokeDetail , pokeLvl , pokemonName)
-  getTrainerPokemon(userId)
+  const opponentPokemon = await getOpponentPokemon(pokeDetail , pokeLvl , pokemonName)
+  const trainerPokemon = await getTrainerPokemon(userId)
+  
+  const Damage1 = calculateDamage(trainerPokemon , opponentPokemon)
+  
    
    
   //  console.log(opponentPokemon)
@@ -44,30 +47,50 @@ async function battle(bot, query) {
   //  console.log(Damage1 , Damage2)
 }
 
-async function calculateDamage(attacker, defender, move) {
-  
-  const Level = attacker.Level; // Set the Pokémon's level
-const Power = move.power; // Set the power of the move
+async function calculateDamage(attacker, defender) {
+ 
+const Level = attacker.level; // Set the Pokémon's level
+const Power = attacker.moves[1].power; // Set the power of the move
 const Attack = attacker.stats.attack; // Get the attacker's Attack stat
 const Defense = defender.stats.defense; // Get the defender's Defense stat
 const SpA = attacker.stats.specialAttack; // Get the attacker's Special Attack stat
 const SpD = defender.stats.specialDefense; // 
+const attackerType1 = attacker.type[0]
+const  attackerType2 = attacker.type[1]
+const defenderType = defender.type[0].type.name
+const moveType = attacker.moves[1].type
   
-  const Modifier = await calculateModifier(attackerType, defenderType, moveType) 
-  const PhysicalDamage = Math.floor((((2 * Level / 5 + 2) * Power * (Attack / Defense) / 50) + 2) * Modifier)
-  const SpecialDamage = Math.floor((((2 * Level / 5 + 2) * Power * (SpA / SpD) / 50) + 2) * Modifier);
+   const Modifier1 = await calculateModifier(attackerType1, defenderType, moveType)
+   const Modifier2 = await attackerType2 && calculateModifier(attackerType2, defenderType, moveType) 
+   
+   const baseDamagePhysical = (((2 * Level / 5 + 2) * Power * (Attack / Defense) / 50) + 2)
+   const baseSpecialDamage = (((2 * Level / 5 + 2) * Power * (SpA / SpD) / 50) + 2)
+  const PhysicalDamage1 = Math.floor(baseDamagePhysical * Modifier1)
+  const PhysicalDamage2 = Modifier2 && Math.floor(baseDamagePhysical * Modifier2)
+  const SpecialDamage1 = Math.floor( baseSpecialDamage * Modifier1);
+  const SpecialDamage2 = Modifier2 && Math.floor( baseSpecialDamage * Modifier2);
+  
+  
+  const finalPhysicalDamage = PhysicalDamage2 ? Math.max(PhysicalDamage1 , PhysicalDamage2) : PhysicalDamage1
+  const finalSpecialDamage = SpecialDamage2 ? Math.max(SpecialDamage1 , SpecialDamage2) : SpecialDamage1
+  
  
  const isPhysicalMove = true; // Placeholder variable, replace with your move's category check
 
 // If the move is a physical move, use the PhysicalDamage value
 // If the move is a special move, use the SpecialDamage value
-const Damage = isPhysicalMove ? PhysicalDamage : SpecialDamage;
+const Damage = isPhysicalMove ? finalPhysicalDamage : finalSpecialDamage;
  
+ console.log(Damage)
  return Damage
+
 }
 
 
 async function calculateModifier(attackerType, defenderType, moveType) {
+  
+  console.log(attackerType ,)
+  
   try {
     // Fetch the attacker's type data
     const attackerTypeResponse = await axios.get(`https://pokeapi.co/api/v2/type/${attackerType}`);
@@ -83,8 +106,7 @@ async function calculateModifier(attackerType, defenderType, moveType) {
     // Check if the move is super effective against the defender's type
     if (defenderDamageRelations.double_damage_from.some((type) => type.name === moveType)) {
       effectiveness *= 2;
-
-      
+      console.log( 'Super Effective' , effectiveness)
     }
 
     // Check if the move is not very effective against the defender's type
@@ -97,7 +119,7 @@ async function calculateModifier(attackerType, defenderType, moveType) {
     // Check if the move has no effect on the defender's type
     if (defenderDamageRelations.no_damage_from.some((type) => type.name === moveType)) {
       effectiveness *= 0;
-      console.log( 'noEffect' , effectiveness)
+      console.log( 'No Effect' , effectiveness)
     }
 
     // Check if the move is of the same type as the attacker
@@ -105,7 +127,7 @@ async function calculateModifier(attackerType, defenderType, moveType) {
     const stabModifier = isSTAB ? 1.5 : 1;
 
     // Calculate the final modifier
-    
+    console.log(stabModifier)
     const modifier = effectiveness * stabModifier;
 
     return modifier;
@@ -118,14 +140,27 @@ async function getTrainerPokemon(userId) {
   
     const pokeDetail = await userPokeModal.findOne({trainer : userId})
   
-     const moves = pokeDetail.moves;
+     const level = pokeDetail.level
+     const pokeMoves = pokeDetail.moves;
       const types = pokeDetail.type;
       const abilities = pokeDetail.abilities;
-      const stats = pokeDetail.baseStats;
+      const baseStats = pokeDetail.baseStats;
+      const pokeEVs = pokeDetail.ev
+      const experience = pokeDetail.experience
+      const pokeNat = pokeDetail.nature
+      const pokeIVs = pokeDetail.iv
+      
+  const mainStats = mainPokemonStats(baseStats , pokeIVs , pokeEVs , level , pokeNat)
+  
+   const myPokemon = {
+      level,
+      type : types,
+      stats : mainStats,
+      moves : pokeMoves,
+   }
     
-    // console.log(moves , types , abilities , stats)
+    return myPokemon
     
-    console.log(stats)
   
 }
 
@@ -148,10 +183,14 @@ async function getOpponentPokemon(pokeDetail , pokeLvl , pokemonName) {
   const mainStats = mainPokemonStats(pokeBaseStats , pokeIVs , pokeEVs , pokeLvl , pokeNat)
   
    const BattlePokemon = {
+      level : pokeLvl,
+      type : types,
       stats : mainStats,
       moves : pokeMoves,
       
    }
+   
+   return BattlePokemon
 }
 
 module.exports = { battle };
