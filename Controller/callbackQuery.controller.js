@@ -3,7 +3,7 @@ const { userInvModal } = require("../model/userInventory");
 async function megaStones(bot, query) {
   const chatId = query.message.chat.id;
   const userId = query.from.id
-  let loading = true
+
   
   // console.log(userId)
   
@@ -12,15 +12,22 @@ async function megaStones(bot, query) {
   // bot.editMessageText("Not equipped", { chat_id: chat_id, message_id: message_id });
   // bot.editMessageReplyMarkup({ inline_keyboard: [] }, { chat_id: chat_id, message_id: message_id });
 
-    const { megaRingisEquipped } = await userInvModal.findOne({
+    const { megaRingisEquipped , megaStones} = await userInvModal.findOne({
       owner: userId,
     });
 
     // console.log(megaRingisEquipped)
+  let message = `<b>Mega Ring</b>: ${!megaRingisEquipped ? "Not Equipped" : "Equipped"}`
+    
+    if(megaStones.length !== 0) {
+      message+=`\n\n<b>————————————</b>\n\n`
+    }
+     megaStones.forEach(userItem => {
+      message+=userItem.name+"\n"
+    })
 
     // console.log(query)
-   await bot.editMessageText(
-      `<b>Mega Ring</b>: ${!megaRingisEquipped ? "Not Equipeed" : "Equipped"}`,
+   await bot.editMessageText(message,
       {
         chat_id: chatId,
         message_id: query.message.message_id,

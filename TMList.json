@@ -1,0 +1,402 @@
+    [
+    {
+        "name": "tm01",
+        "move": "mega-punch",
+        "type": "normal",
+        "power": 80,
+        "accuray": 85,
+        "category": "physical"
+    },
+    {
+        "name": "tm02",
+        "move": "razor-wind",
+        "type": "normal",
+        "power": 80,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm03",
+        "move": "water-pulse",
+        "type": "water",
+        "power": 60,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm04",
+        "move": "rollout",
+        "type": "rock",
+        "power": 30,
+        "accuray": 90,
+        "category": "physical"
+    },
+    {
+        "name": "tm05",
+        "move": "mega-kick",
+        "type": "normal",
+        "power": 120,
+        "accuray": 75,
+        "category": "physical"
+    },
+    {
+        "name": "tm06",
+        "move": "fly",
+        "type": "flying",
+        "power": 90,
+        "accuray": 95,
+        "category": "physical"
+    },
+    {
+        "name": "tm07",
+        "move": "zap-cannon",
+        "type": "electric",
+        "power": 120,
+        "accuray": 50,
+        "category": "special"
+    },
+    {
+        "name": "tm08",
+        "move": "body-slam",
+        "type": "normal",
+        "power": 85,
+        "accuray": 100,
+        "category": "physical"
+    },
+    {
+        "name": "tm09",
+        "move": "take-down",
+        "type": "normal",
+        "power": 90,
+        "accuray": 85,
+        "category": "physical"
+    },
+    {
+        "name": "tm10",
+        "move": "double-edge",
+        "type": "normal",
+        "power": 120,
+        "accuray": 100,
+        "category": "physical"
+    },
+    {
+        "name": "tm11",
+        "move": "bubble-beam",
+        "type": "water",
+        "power": 65,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm12",
+        "move": "water-gun",
+        "type": "water",
+        "power": 40,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm13",
+        "move": "ice-beam",
+        "type": "ice",
+        "power": 90,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm14",
+        "move": "blizzard",
+        "type": "ice",
+        "power": 110,
+        "accuray": 70,
+        "category": "special"
+    },
+    {
+        "name": "tm15",
+        "move": "hyper-beam",
+        "type": "normal",
+        "power": 150,
+        "accuray": 90,
+        "category": "special"
+    },
+    {
+        "name": "tm16",
+        "move": "pay-day",
+        "type": "normal",
+        "power": 40,
+        "accuray": 100,
+        "category": "physical"
+    },
+    {
+        "name": "tm17",
+        "move": "submission",
+        "type": "fighting",
+        "power": 80,
+        "accuray": 80,
+        "category": "physical"
+    },
+    {
+        "name": "tm18",
+        "move": "u-turn",
+        "type": "bug",
+        "power": 70,
+        "accuray": 100,
+        "category": "physical"
+    },
+    {
+        "name": "tm19",
+        "move": "giga-drain",
+        "type": "grass",
+        "power": 75,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm20",
+        "move": "rage",
+        "type": "normal",
+        "power": 20,
+        "accuray": 100,
+        "category": "physical"
+    },
+    {
+        "name": "tm21",
+        "move": "mega-drain",
+        "type": "grass",
+        "power": 40,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm22",
+        "move": "solar-beam",
+        "type": "grass",
+        "power": 120,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm23",
+        "move": "iron-tail",
+        "type": "steel",
+        "power": 100,
+        "accuray": 75,
+        "category": "physical"
+    },
+    {
+        "name": "tm24",
+        "move": "thunderbolt",
+        "type": "electric",
+        "power": 90,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm25",
+        "move": "thunder",
+        "type": "electric",
+        "power": 110,
+        "accuray": 70,
+        "category": "special"
+    },
+    {
+        "name": "tm26",
+        "move": "earthquake",
+        "type": "ground",
+        "power": 100,
+        "accuray": 100,
+        "category": "physical"
+    },
+    {
+        "name": "tm27",
+        "move": "icy-wind",
+        "type": "ice",
+        "power": 55,
+        "accuray": 95,
+        "category": "special"
+    },
+    {
+        "name": "tm28",
+        "move": "dig",
+        "type": "ground",
+        "power": 80,
+        "accuray": 100,
+        "category": "physical"
+    },
+    {
+        "name": "tm29",
+        "move": "psychic",
+        "type": "psychic",
+        "power": 90,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm30",
+        "move": "shadow-ball",
+        "type": "ghost",
+        "power": 80,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm31",
+        "move": "mud-slap",
+        "type": "ground",
+        "power": 20,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm32",
+        "move": "dazzling-gleam",
+        "type": "fairy",
+        "power": 80,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm33",
+        "move": "ice-punch",
+        "type": "ice",
+        "power": 75,
+        "accuray": 100,
+        "category": "physical"
+    },
+    {
+        "name": "tm34",
+        "move": "sludge-wave",
+        "type": "poison",
+        "power": 95,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm35",
+        "move": "flamethrower",
+        "type": "fire",
+        "power": 90,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm36",
+        "move": "self-destruct",
+        "type": "normal",
+        "power": 200,
+        "accuray": 100,
+        "category": "physical"
+    },
+    {
+        "name": "tm37",
+        "move": "egg-bomb",
+        "type": "normal",
+        "power": 100,
+        "accuray": 75,
+        "category": "physical"
+    },
+    {
+        "name": "tm38",
+        "move": "fire-blast",
+        "type": "fire",
+        "power": 110,
+        "accuray": 85,
+        "category": "special"
+    },
+    {
+        "name": "tm39",
+        "move": "rock-tomb",
+        "type": "rock",
+        "power": 60,
+        "accuray": 95,
+        "category": "physical"
+    },
+    {
+        "name": "tm40",
+        "move": "skull-bash",
+        "type": "normal",
+        "power": 130,
+        "accuray": 100,
+        "category": "physical"
+    },
+    {
+        "name": "tm41",
+        "move": "thunder-punch",
+        "type": "electric",
+        "power": 75,
+        "accuray": 100,
+        "category": "physical"
+    },
+    {
+        "name": "tm42",
+        "move": "dream-eater",
+        "type": "psychic",
+        "power": 100,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm43",
+        "move": "sky-attack",
+        "type": "flying",
+        "power": 140,
+        "accuray": 90,
+        "category": "physical"
+    },
+    {
+        "name": "tm44",
+        "move": "play-rough",
+        "type": "fairy",
+        "power": 90,
+        "accuray": 90,
+        "category": "physical"
+    },
+    {
+        "name": "tm45",
+        "move": "solar-beam",
+        "type": "grass",
+        "power": 120,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm46",
+        "move": "thief",
+        "type": "dark",
+        "power": 60,
+        "accuray": 100,
+        "category": "physical"
+    },
+    {
+        "name": "tm47",
+        "move": "explosion",
+        "type": "normal",
+        "power": 250,
+        "accuray": 100,
+        "category": "physical"
+    },
+    {
+        "name": "tm48",
+        "move": "rock-slide",
+        "type": "rock",
+        "power": 75,
+        "accuray": 90,
+        "category": "physical"
+    },
+    {
+        "name": "tm49",
+        "move": "tri-attack",
+        "type": "normal",
+        "power": 80,
+        "accuray": 100,
+        "category": "special"
+    },
+    {
+        "name": "tm50",
+        "move": "overheat",
+        "type": "fire",
+        "power": 130,
+        "accuray": 90,
+        "category": "special"
+    }
+    ]

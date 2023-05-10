@@ -7,8 +7,7 @@ const pokeBallSchema = new mongoose.Schema({
 
 const megaStoneSchema = new mongoose.Schema({
   name: { type: String, },
-  description: { type: String, },
-  price: { type: Number},
+  pokemon : {type : String}
 });
 
 const tmSchema = new mongoose.Schema({
@@ -25,6 +24,7 @@ const inventorySchema = new mongoose.Schema({
   },
   pokeDollars: {type : Number , required : true , default : 50},
   pokeBalls: [pokeBallSchema],
+  pokeItems : [{name : String , stock : Number}],
   megaStones: [megaStoneSchema],
   TMs: [tmSchema],
   megaRingisEquipped:{type : Boolean , default : false}

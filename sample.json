@@ -1,254 +1,260 @@
-// mega stone json format
-
-[
-  {
-    "name": "Abomasite",
-    "price": 12000,
-    "pokemon": ["Abomasnow"]
-  },
-  {
-    "name": "Absolite",
-    "price": 10000,
-    "pokemon": ["Absol"]
-  },
-  {
-    "name": "Aerodactylite",
-    "price": 15000,
-    "pokemon": ["Aerodactyl"]
-  },
-  {
-    "name": "Aggronite",
-    "price": 20000,
-    "pokemon": ["Aggron"]
-  },
-  {
-    "name": "Alakazite",
-    "price": 18000,
-    "pokemon": ["Alakazam"]
-  },
-  {
-    "name": "Altarianite",
-    "price": 16000,
-    "pokemon": ["Altaria"]
-  },
-  {
-    "name": "Ampharosite",
-    "price": 17000,
-    "pokemon": ["Ampharos"]
-  },
-  {
-    "name": "Audinite",
-    "price": 22000,
-    "pokemon": ["Audino"]
-  },
-  {
-    "name": "Banettite",
-    "price": 11000,
-    "pokemon": ["Banette"]
-  },
-  {
-    "name": "Beedrillite",
-    "price": 13000,
-    "pokemon": ["Beedrill"]
-  },
-  {
-    "name": "Blastoisinite",
-    "price": 25000,
-    "pokemon": ["Blastoise"]
-  },
-  {
-    "name": "Blazikenite",
-    "price": 30000,
-    "pokemon": ["Blaziken"]
-  },
-  {
-    "name": "Cameruptite",
-    "price": 19000,
-    "pokemon": ["Camerupt"]
-  },
-  {
-    "name": "Charizardite X",
-    "price": 28000,
-    "pokemon": ["Charizard"]
-  },
-  {
-    "name": "Charizardite Y",
-    "price": 28000,
-    "pokemon": ["Charizard"]
-  },
-  {
-    "name": "Diancite",
-    "price": 40000,
-    "pokemon": ["Diancie"]
-  },
-  {
-    "name": "Galladite",
-    "price": 22000,
-    "pokemon": ["Gallade"]
-  },
-  {
-    "name": "Garchompite",
-    "price": 25000,
-    "pokemon": ["Garchomp"]
-  },
-  {
-    "name": "Gardevoirite",
-    "price": 22000,
-    "pokemon": ["Gardevoir"]
-  },
-  {
-    "name": "Gengarite",
-    "price": 20000,
-    "pokemon": ["Gengar"]
-  },
-  {
-    "name": "Glalitite",
-    "price": 20000,
-    "pokemon": ["Glalie"]
-  },
-  {
-    "name": "Gyaradosite",
-    "price": 22000,
-    "pokemon": ["Gyarados"]
-  },
-  {
-    "name": "Heracronite",
-    "price": 17000,
-    "pokemon": ["Heracross"]
-  },
-  {
-    "name": "Houndoominite",
-    "pokemon": "Houndoom",
-    "price": 18000
-  },
-  {
-    "name": "Kangaskhanite",
-    "pokemon": "Kangaskhan",
-    "price": 15000
-  },
-  {
-    "name": "Latiasite",
-    "pokemon": "Latias",
-    "price": 23000
-  },
-  {
-    "name": "Latiosite",
-    "pokemon": "Latios",
-    "price": 23000
-  },
-  {
-    "name": "Lopunnite",
-    "pokemon": "Lopunny",
-    "price": 20000
-  },
-  {
-    "name": "Lucarionite",
-    "pokemon": "Lucario",
-    "price": 22000
-  },
-  {
-    "name": "Manectite",
-    "pokemon": "Manectric",
-    "price": 18000
-  },
-  {
-    "name": "Mawilite",
-    "pokemon": "Mawile",
-    "price": 15000
-  },
-  {
-    "name": "Medichamite",
-    "pokemon": "Medicham",
-    "price": 20000
-  },
-  {
-    "name": "Metagrossite",
-    "pokemon": "Metagross",
-    "price": 25000
-  },
-  {
-    "name": "Mewtwonite X",
-    "pokemon": "Mewtwo",
-    "price": 30000
-  },
-  {
-    "name": "Mewtwonite Y",
-    "pokemon": "Mewtwo",
-    "price": 30000
-  },
-  {
-    "name": "Pidgeotite",
-    "pokemon": "Pidgeot",
-    "price": 19000
-  },
-  {
-    "name": "Pinsirite",
-    "pokemon": "Pinsir",
-    "price": 16000
-  },
-  {
-    "name": "Salamencite",
-    "pokemon": "Salamence",
-    "price": 22000
-  },
-  {
-    "name": "Sceptilite",
-    "pokemon": "Sceptile",
-    "price": 20000
-  },
-  {
-    "name": "Scizorite",
-    "pokemon": "Scizor",
-    "price": 20000
-  },
-  {
-    "name": "Sharpedonite",
-    "pokemon": "Sharpedo",
-    "price": 18000
-  },
-  {
-    "name": "Slowbronite",
-    "pokemon": "Slowbro",
-    "price": 18000
-  },
-  {
-    "name": "Steelixite",
-    "pokemon": "Steelix",
-    "price": 20000
-  },
-  {
-    "name": "Swampertite",
-    "pokemon": "Swampert",
-    "price": 20000
-  },
-  {
-    "name": "Tyranitarite",
-    "pokemon": "Tyranitar",
-    "price": 25000
-  },
-  {
-    "name": "Venusaurite",
-    "pokemon": "Venusaur",
-    "price": 20000
-  },
-  {
-    "name": "Wigglytuffite",
-    "pokemon": ["Wigglytuff"],
-    "price": 20000
-  },
-  {
-    "name": "Xerneasite",
-    "pokemon": ["Xerneas"],
-    "price": 25000
-  },
-  {
-    "name": "Yveltalite",
-    "pokemon": ["Yveltal"],
-    "price": 25500
-  },
-  {
-    "name": "Zapdosite",
-    "pokemon": ["Zapdos"],
-    "price": 20000
-  }
-]
+{
+  "1": [
+    {
+      "name": "Venasaur"
+    },
+    {
+      "name": "Charizard"
+    },
+    {
+      "name": "Blastoise"
+    },
+    {
+      "name": "Beedrill"
+    },
+    {
+      "name": "Pidgeot"
+    },
+    {
+      "name": "Arcanine"
+    },
+    {
+      "name": "Alakazam"
+    },
+    {
+      "name": "Slowbro"
+    },
+    {
+      "name": "Gengar"
+    },
+    {
+      "name": "Electrode"
+    },
+    {
+      "name": "Kangaskhan"
+    },
+    {
+      "name": "Pinsir"
+    },
+    {
+      "name": "Gyarados"
+    },
+    {
+      "name": "Vaporeon"
+    },
+    {
+      "name": "Jolteon"
+    },
+    {
+      "name": "Flareon"
+    },
+    {
+      "name": "Aerodactyl"
+    },
+    {
+      "name": "Snorlax"
+    },
+    {
+      "name": "Dragonite"
+    },
+    {
+      "name": "Lapras"
+    },
+    {
+      "name": "Dugtrio"
+    }
+  ],
+  "2": [
+    {
+      "name": "Typhlosion"
+    },
+    {
+      "name": "Feraligatr"
+    },
+    {
+      "name": "Ampharos"
+    },
+    {
+      "name": "Scizor"
+    },
+    {
+      "name": "Heracross"
+    },
+    {
+      "name": "Espeon"
+    },
+    {
+      "name": "Houndoom"
+    },
+    {
+      "name": "Tyranitar"
+    }
+  ],
+  "3": [
+    {
+      "name": "Sceptile"
+    },
+    {
+      "name": "Blaziken"
+    },
+    {
+      "name": "Swampert"
+    },
+    {
+      "name": "Ludicolo"
+    },
+    {
+      "name": "Gardevoir"
+    },
+    {
+      "name": "Slaking"
+    },
+    {
+      "name": "Ninjask"
+    },
+    {
+      "name": "Aggron"
+    },
+    {
+      "name": "Camerupt"
+    },
+    {
+      "name": "Altaria"
+    },
+    {
+      "name": "Salamence"
+    },
+    {
+      "name": "Metagross"
+    },
+    {
+      "name": "Gallade"
+    },
+    {
+      "name": "Sharpedo"
+    },
+    {
+      "name": "Sableye"
+    },
+    {
+      "name": "Mawile"
+    },
+    {
+      "name": "Manectric"
+    },
+    {
+      "name": "Banette"
+    },
+    {
+      "name": "Absol"
+    }
+  ],
+  "4": [
+    {
+      "name": "Infernape"
+    },
+    {
+      "name": "Empoleon"
+    },
+    {
+      "name": "Steelix"
+    },
+    {
+      "name": "Lopunny"
+    },
+    {
+      "name": "Medicham"
+    },
+    {
+      "name": "Garchomp"
+    },
+    {
+      "name": "Lucario"
+    },
+    {
+      "name": "Leafeon"
+    },
+    {
+      "name": "Glaceon"
+    },
+    {
+      "name": "Rhyperior"
+    },
+    {
+      "name": "Porygon-Z"
+    },
+    {
+      "name": "Weavile"
+    }
+  ],
+  "5": [
+    { "name": "Gigalith" },
+    { "name": "Excadrill" },
+    { "name": "Conkeldurr" },
+    { "name": "Scolipede" },
+    { "name": "Krookodile" },
+    { "name": "Darmanitan [zen]" },
+    { "name": "Scrafty" },
+    { "name": "Cofagrigus" },
+    { "name": "Archeops" },
+    { "name": "Escavalier" },
+    { "name": "Haxorus" },
+    { "name": "Beartic" },
+    { "name": "Accelgor" },
+    { "name": "Mienshao" },
+    { "name": "Golurk" },
+    { "name": "Bisharp" },
+    { "name": "Volcarona" },
+    { "name": "Crustle" },
+    { "name": "Druddigon" }
+  ],
+  "6": [
+    {
+      "name": "Chesnaught"
+    },
+    {
+      "name": "Greninja"
+    },
+    {
+      "name": "Tyrantrum"
+    },
+    {
+      "name": "Goodra"
+    },
+    {
+      "name": "Avalugg"
+    },
+    {
+      "name": "Florges"
+    },
+    {
+      "name": "Sylveon"
+    },
+    {
+      "name": "Hawlucha"
+    }
+  ],
+  "7": [
+    {
+      "name": "Decidueye"
+    },
+    {
+      "name": "Incineroar"
+    },
+    {
+      "name": "Primarina"
+    },
+    {
+      "name": "Vikavolt"
+    },
+    {
+      "name": "Lycanroc [ dusk ]"
+    },
+    {
+      "name": "Mudsdale"
+    },
+    { "name": "Passimian" },
+    { "name": "Golisopod" },
+    { "name": "Kommo-o" }
+  ]
+}

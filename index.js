@@ -4,7 +4,7 @@ const { startCommand, huntCommand, callbackQuery, myInvCommand } = require("./Co
 const { connect } = require("./config/db.config");
 const PokeMart = require("./model/pokeStore.model");
 const { pokeStoreCommand } = require("./Controller/pokeStore.controller");
-const { userBuyCommand } = require("./Controller/userBuyGive.controller");
+const { userBuyCommand, userGivePokeDollar } = require("./Controller/userBuyGive.controller");
 
 const token = "6235641191:AAEgYT5jZMy9cfIL-ZK-clM58-ffT0LchtA";
 
@@ -13,15 +13,18 @@ const bot = new TelegramBot(token, { polling: true });
 
 bot.onText(/\/start/, (msg , match) => startCommand(bot , msg , match));
 
-
-
-bot.onText(/\/hunt/, (msg, match) => huntCommand(bot , msg , match));
+bot.onText(/\/hunt/, (msg) => huntCommand(bot , msg));
 
 bot.onText(/\/myinventory/ , (msg , match) => myInvCommand(bot , msg , match) )
 
 bot.onText(/\/pokestore/ , (msg) => pokeStoreCommand(bot , msg))
 
-bot.onText(/\/buy (.+) (.+)/ , (msg , match) => userBuyCommand(bot , msg , match))
+bot.onText(/\/buy/ , (msg , match) => userBuyCommand(bot , msg , match))
+
+bot.onText(/\/give/ , (msg , match) => userGivePokeDollar(bot , msg , match))
+
+bot.onText(/\/safari/ , (msg , match) => safariCommand(bot , msg , match))
+
 
 bot.on("callback_query", (query) => callbackQuery(bot , query));
 
