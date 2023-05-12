@@ -1,7 +1,14 @@
 const axios = require('axios');
+const fs = require('fs')
 const { userPokeModal } = require('../model/userPoke');
-const { mainPokemonStats } = require('./pokemonStats.controller');
-const { getBaseStats, generateIVs, generateNat, getMoves, getTypes, getExperience } = require("./user.controller");
+const { mainPokemonStats, calculateDamage } = require('./pokemonStats.controller');
+const { getBaseStats, generateIVs, generateNat, getMoves, getTypes, getExperience, getAbilites } = require("./user.controller");
+let { getPreviousMessageId } = require('./controller');
+let opponentPokemon = null
+let trainerPokemon = null
+
+let isBattleActive = false
+
 
 
   const baseStats = [
@@ -26,119 +33,277 @@ function generateEVs() {
 
 
 async function battle(bot, query) {
+  
+  const battle_id = query.message.message_id
+  const chatId = query.message.chat.id
   const userId = query.from.id
   const pokemonName = query.data.trim().split(" ")[1];
   const pokeLvl = query.data.trim().split(" ").map(Number)[2];
+  const prevMessageId = getPreviousMessageId()
+  
+  
+   console.log(prevMessageId)
+  
+  
+  if(!isBattleActive && prevMessageId !== battle_id) {
+    bot.answerCallbackQuery(query.id , 'The Pokemon has fled')
+    return
+  } else if (isBattleActive) {
+    bot.answerCallbackQuery(query.id , "You're Currently in Pokemon Battle")
+    return
+  }
+  
+  // if(hunt_id !== battle_id) {
+  //   bot.sendMessage(chatId , 'Cannot hunt while battling' , {
+  //      reply_to_message_id: query.message.message_id, 
+  //   })
+  // }
 
   const pokeDetail = await axios.get(
     `https://pokeapi.co/api/v2/pokemon/${pokemonName}`
   );
   
-  const opponentPokemon = await getOpponentPokemon(pokeDetail , pokeLvl , pokemonName)
-  const trainerPokemon = await getTrainerPokemon(userId)
   
-  const Damage1 = calculateDamage(trainerPokemon , opponentPokemon)
-  
-   
-   
-  //  console.log(opponentPokemon)
-    
-  // console.log(hp , attack , defense , Damage1)
-  //  console.log(Damage1 , Damage2)
-}
-
-async function calculateDamage(attacker, defender) {
- 
-const Level = attacker.level; // Set the Pokémon's level
-const Power = attacker.moves[1].power; // Set the power of the move
-const Attack = attacker.stats.attack; // Get the attacker's Attack stat
-const Defense = defender.stats.defense; // Get the defender's Defense stat
-const SpA = attacker.stats.specialAttack; // Get the attacker's Special Attack stat
-const SpD = defender.stats.specialDefense; // 
-const attackerType1 = attacker.type[0]
-const  attackerType2 = attacker.type[1]
-const defenderType = defender.type[0].type.name
-const moveType = attacker.moves[1].type
-  
-   const Modifier1 = await calculateModifier(attackerType1, defenderType, moveType)
-   const Modifier2 = await attackerType2 && calculateModifier(attackerType2, defenderType, moveType) 
-   
-   const baseDamagePhysical = (((2 * Level / 5 + 2) * Power * (Attack / Defense) / 50) + 2)
-   const baseSpecialDamage = (((2 * Level / 5 + 2) * Power * (SpA / SpD) / 50) + 2)
-  const PhysicalDamage1 = Math.floor(baseDamagePhysical * Modifier1)
-  const PhysicalDamage2 = Modifier2 && Math.floor(baseDamagePhysical * Modifier2)
-  const SpecialDamage1 = Math.floor( baseSpecialDamage * Modifier1);
-  const SpecialDamage2 = Modifier2 && Math.floor( baseSpecialDamage * Modifier2);
+  opponentPokemon = await getOpponentPokemon(pokeDetail , pokeLvl , pokemonName)
+  trainerPokemon = await getTrainerPokemon(userId)
+  // pokemonJSON[userId] = {
+  //   opponent : opponentPokemon,
+  //   trainer : trainerPokemon,
+  //   prevMessageId,
+  //   isBattleActive : true
+  // }
   
   
-  const finalPhysicalDamage = PhysicalDamage2 ? Math.max(PhysicalDamage1 , PhysicalDamage2) : PhysicalDamage1
-  const finalSpecialDamage = SpecialDamage2 ? Math.max(SpecialDamage1 , SpecialDamage2) : SpecialDamage1
+  const inline_keyboard = []
+  // const Damage1 = calculateDamage(trainerPokemon , opponentPokemon)
   
- 
- const isPhysicalMove = true; // Placeholder variable, replace with your move's category check
-
-// If the move is a physical move, use the PhysicalDamage value
-// If the move is a special move, use the SpecialDamage value
-const Damage = isPhysicalMove ? finalPhysicalDamage : finalSpecialDamage;
- 
- console.log(Damage)
- return Damage
-
-}
-
-
-async function calculateModifier(attackerType, defenderType, moveType) {
   
-  console.log(attackerType ,)
-  
-  try {
-    // Fetch the attacker's type data
-    const attackerTypeResponse = await axios.get(`https://pokeapi.co/api/v2/type/${attackerType}`);
-    const attackerDamageRelations = attackerTypeResponse.data.damage_relations;
-
-    // Fetch the defender's type data
-    const defenderTypeResponse = await axios.get(`https://pokeapi.co/api/v2/type/${defenderType}`);
-    const defenderDamageRelations = defenderTypeResponse.data.damage_relations;
-
-    // Determine the move's effectiveness against the defender's type
-    let effectiveness = 1;
-
-    // Check if the move is super effective against the defender's type
-    if (defenderDamageRelations.double_damage_from.some((type) => type.name === moveType)) {
-      effectiveness *= 2;
-      console.log( 'Super Effective' , effectiveness)
-    }
-
-    // Check if the move is not very effective against the defender's type
-    if (defenderDamageRelations.half_damage_from.some((type) => type.name === moveType)) {
-      effectiveness *= 0.5;
-      console.log( 'very effect' , effectiveness)
+  let moves_message = ""
+  let trainerPokemonMoves = []
+  trainerPokemon.moves.forEach((ele) => {
+    let [first , second] = ele.name.split("-")
+    first = first.charAt(0).toUpperCase() + first.slice(1)
+     const text = `${second ? first+" "+second : first}`
+     const callback_data = `fight ${ele.power} ${ele.type} ${ele.accuracy} ${text}`
+     
+     moves_message+=`${text} [${ele.type}]
+Power:   ${ele.power},     Accuracy: ${ele.accuracy}
+`
+     
+     
+        trainerPokemonMoves.push({
+       text,
+       callback_data
+     })
+     if(trainerPokemonMoves.length%2 === 0 ) {
+       inline_keyboard.push(trainerPokemonMoves)
+       trainerPokemonMoves = [] 
+     }
       
-    }
+  })
+  
+  inline_keyboard.push([
+    {text : 'Poke Balls' , callback_data : 'mypokeballs' },
+    {text : 'Run' , callback_data : 'game_left' },
+    {text : 'Pokemon' , callback_data : 'mypokemonTeam' },
+  ])
+  
+   
+await bot.sendMessage(chatId , `Battle begins!
 
-    // Check if the move has no effect on the defender's type
-    if (defenderDamageRelations.no_damage_from.some((type) => type.name === moveType)) {
-      effectiveness *= 0;
-      console.log( 'No Effect' , effectiveness)
-    }
+Wild <b>${pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1)}</b> [${opponentPokemon.type.join(", ")}]
+Lv. ${pokeLvl}  •  HP ${opponentPokemon.stats.totalhp}/${opponentPokemon.stats.totalhp}
+███████████
 
-    // Check if the move is of the same type as the attacker
-    const isSTAB = attackerType === moveType;
-    const stabModifier = isSTAB ? 1.5 : 1;
+Current turn: <a href="tg://user?id=${query.from.id}">${query.from.first_name}</a>
+<b>${trainerPokemon.name}</b> [${trainerPokemon.type.join(", ")}]
+Lv. ${trainerPokemon.level}  •  HP ${trainerPokemon.stats.totalhp}/${trainerPokemon.stats.totalhp}
+███████████
 
-    // Calculate the final modifier
-    console.log(stabModifier)
-    const modifier = effectiveness * stabModifier;
+${moves_message}` , {
+  reply_markup : {
+    inline_keyboard : inline_keyboard
+  },
+  parse_mode : 'HTML'
+}).then((res) => {
+  isBattleActive = true
+  // fs.writeFile('opponentPokemon.json' , JSON.stringify(pokemonJSON) , 'utf-8' , (data, err) => {
+  //   // if(err) return 'something wrong'
+  //   console.log(data)
+  // })
+  bot.answerCallbackQuery(query.id, `Lower ${pokemonName.charAt(0).toUpperCase() + pokemonName.slice(1)}'s HP for a batter chance of catching it`);
+})
+}
 
-    return modifier;
-  } catch (error) {
-    console.log('Error:', error.message);
+async function battleBeginFight(bot , query) {
+  
+   const Prevkeyboard = query.message.reply_markup.inline_keyboard
+
+  const userId = query.from.id
+  const chatId = query.message.chat.id
+  const messageId = query.message.message_id
+   
+   
+  // console.log(trainerPokemon , opponentPokemon , movePower , moveType)
+  const botTotalHP = opponentPokemon.stats.totalhp
+  const trainerTotalHP = trainerPokemon.stats.totalhp
+  const movePower = query.data.split(" ").map(Number)[1]
+  const moveType = query.data.trim().split(" ")[2]
+  const moveName = query.data.trim().split(" ")[4]
+  const randomMove = Math.floor(Math.random() * (opponentPokemon.moves.length-1 - 0) + 0)
+  const botMovePower = opponentPokemon.moves[randomMove].power
+  const botMoveType = opponentPokemon.moves[randomMove].type
+  const botMoveName = opponentPokemon.moves[randomMove].name
+  // const moveAccuracy = query.data.trim().split(" ")[3].map(Number)
+
+
+  const myDamage = await calculateDamage(trainerPokemon , opponentPokemon ,movePower , moveType)
+  const botDamage = await calculateDamage(opponentPokemon , trainerPokemon , botMovePower , botMoveType)
+  
+  opponentPokemon.stats.currenthp = opponentPokemon.stats.currenthp - myDamage.Damage
+  trainerPokemon.stats.currenthp = trainerPokemon.stats.currenthp - botDamage.Damage
+  
+  if(trainerPokemon.stats.currenthp < 0) {
+    trainerPokemon.stats.currenthp = 0
   }
+  if(opponentPokemon.stats.currenthp < 0) {
+    opponentPokemon.stats.currenthp = 0
+  }
+  
+  const botHP = opponentPokemon.stats.currenthp / botTotalHP * 100
+  const trainerHP = trainerPokemon.stats.currenthp / trainerTotalHP * 100
+  let moves_message = ""
+  trainerPokemon.moves.forEach((ele) => {
+    let [first , second] = ele.name.split("-")
+    first = first.charAt(0).toUpperCase() + first.slice(1)
+     const text = `${second ? first+" "+second : first}`
+     
+     moves_message+=`${text} [${ele.type}]
+Power:   ${ele.power},     Accuracy: ${ele.accuracy}
+`
+      
+  })
+  
+  
+  const trainerProgressBar = progressBar(trainerHP)
+  const BotProgressBar =  progressBar(botHP)
+
+  
+  let Prev_message = `${opponentPokemon.name.charAt(0).toUpperCase() + opponentPokemon.name.slice(1)} used <b>${botMoveName}</b>.
+${botDamage.message}.
+Dealt ${botDamage.Damage} damage.
+
+Wild <b>${opponentPokemon.name}</b> [${opponentPokemon.type.join(", ")}]
+Lv. ${opponentPokemon.level}  •  HP <b>${opponentPokemon.stats.currenthp}/${botTotalHP}</b>
+${BotProgressBar}
+
+Current turn: <a href="tg://user?id=${query.from.id}">${query.from.first_name}</a>
+<b>${trainerPokemon.name}</b> [${trainerPokemon.type.join(", ")}]
+Lv. ${trainerPokemon.level}  •  HP <b>${trainerPokemon.stats.currenthp}/${trainerTotalHP}</b>
+${trainerProgressBar}
+
+${moves_message}`
+  
+  
+  const myDamageMsg = `${trainerPokemon.name} used <b>${ProperMoveName(moveName)}</b>.
+${myDamage.message}.
+Dealt ${myDamage.Damage} damage.
+
+${opponentPokemon.name.charAt(0).toUpperCase()+opponentPokemon.name.slice(1)} attacking...
+`
+  
+  bot.editMessageText(myDamageMsg , {
+    chat_id : chatId ,
+    message_id: query.message.message_id,
+    parse_mode : 'HTML'
+  })
+  
+  setTimeout(() => {
+    
+    
+    if(trainerPokemon.stats.currenthp === 0) {
+      isBattleActive = false
+      getPreviousMessageId(() => {
+        return null
+      })
+      let botWinMessage = `${opponentPokemon.name.charAt(0).toUpperCase()+opponentPokemon.name.slice(1)} used <b>${ProperMoveName(botMoveName)}</b>.
+${trainerPokemon.name.charAt(0).toUpperCase()+trainerPokemon.name.slice(1)} fainted.
+
+Your entire team has fainted and the wild ${opponentPokemon.name.charAt(0).toUpperCase()+opponentPokemon.name.slice(1)} has fled.`
+      
+      bot.editMessageText(botWinMessage , {
+    chat_id : chatId ,
+    message_id: messageId,
+    parse_mode : 'HTML'
+     })
+     
+    } else if (opponentPokemon.stats.currenthp === 0) {
+      isBattleActive = false
+      getPreviousMessageId(() => {
+        return null
+      })
+      let weWinMessage = `${trainerPokemon.name.charAt(0).toUpperCase()+trainerPokemon.name.slice(1)} used <b>${ProperMoveName(moveName)}</b>.
+<i>${myDamage.message}</i>
+
+The wild ${opponentPokemon.name.charAt(0).toUpperCase()+opponentPokemon.name.slice(1)} fainted.
+
++7 💵` 
+          
+       bot.editMessageText(weWinMessage , {
+    chat_id : chatId ,
+    message_id: messageId,
+    parse_mode : 'HTML'
+  })
+    }
+     else {
+      
+        bot.editMessageText(Prev_message , {
+    chat_id : chatId ,
+    message_id: messageId,
+    parse_mode : 'HTML'
+  }).then(async () => {
+    await bot.editMessageReplyMarkup({
+      inline_keyboard : Prevkeyboard
+    } , {
+      chat_id : chatId,
+      message_id : messageId
+    })
+  })
+        
+    }
+    
+  } , 2000)
+  
+  bot.answerCallbackQuery(query.id)
+  
+  
+ 
+ 
+
+
+
+
+// Bulbasaur is attacking...
+ 
+  
+}
+
+
+function progressBar(hp) {
+  
+
+  const progressBarLength = 10; // Length of the progress bar
+  const progressBarFilled = Math.round((hp / 100) * (progressBarLength)); // Calculate the filled portion of the progress bar
+  const progressBarEmpty = progressBarLength - progressBarFilled; // Calculate the empty portion of the progress bar
+
+  const progressBar = '█'.repeat(progressBarFilled) + '▒'.repeat(progressBarEmpty);
+  
+  return progressBar
 }
 
 async function getTrainerPokemon(userId) {
   
-    const pokeDetail = await userPokeModal.findOne({trainer : userId})
+    const pokeDetail = await userPokeModal.findOne({trainer : userId}).maxTime(30000)
   
      const level = pokeDetail.level
      const pokeMoves = pokeDetail.moves;
@@ -153,6 +318,7 @@ async function getTrainerPokemon(userId) {
   const mainStats = mainPokemonStats(baseStats , pokeIVs , pokeEVs , level , pokeNat)
   
    const myPokemon = {
+      name : pokeDetail.nickname ? pokeDetail.nickname : pokeDetail.name,
       level,
       type : types,
       stats : mainStats,
@@ -174,7 +340,7 @@ async function getOpponentPokemon(pokeDetail , pokeLvl , pokemonName) {
 
   const pokeTypes = getTypes(types);
   const pokeMoves = await getMoves(moves, pokeLvl);
-  // const pokeAbilities = await getAbilites(abilities);
+  const pokeAbilities = await getAbilites(abilities);
   const pokeBaseStats = getBaseStats(stats);
   const pokeNat = await generateNat();
   const pokeIVs = generateIVs();
@@ -182,9 +348,14 @@ async function getOpponentPokemon(pokeDetail , pokeLvl , pokemonName) {
   const pokeExp = await getExperience(pokeLvl, pokemonName);
   const mainStats = mainPokemonStats(pokeBaseStats , pokeIVs , pokeEVs , pokeLvl , pokeNat)
   
+
    const BattlePokemon = {
+      name : pokemonName,
       level : pokeLvl,
-      type : types,
+      iv : pokeIVs,
+      ev : pokeEVs,
+      experience : pokeExp,
+      type : pokeTypes,
       stats : mainStats,
       moves : pokeMoves,
       
@@ -193,4 +364,17 @@ async function getOpponentPokemon(pokeDetail , pokeLvl , pokemonName) {
    return BattlePokemon
 }
 
-module.exports = { battle };
+function ProperMoveName(moveName) {
+  let [first , second] = moveName.trim().split("-")
+  
+  first = first.charAt(0).toUpperCase()+first.slice(1)
+  second = second && second.charAt(0).toUpperCase()+second.slice(1)
+
+  const fullMoveName = second ? `${first} ${second}` : first
+  
+  return fullMoveName
+}
+
+module.exports = { battle  , battleBeginFight , 
+ statusBattleActive : () => isBattleActive
+};

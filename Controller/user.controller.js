@@ -170,23 +170,22 @@ async function getMoves(moves, pokeLvl) {
               name: move_name,
               power,
               accuracy,
-              type : name
+              type: name,
             });
           }
           break;
         }
       }
     }
-    while(moves_name.length > 4) {
-      moves_name.shift()
-    } 
-  return moves_name;
-  
-    console.log(moves)
+    while (moves_name.length > 4) {
+      moves_name.shift();
+    }
+    return moves_name;
+
+    console.log(moves);
   } catch (error) {
     console.log(error);
   }
-
 }
 
 async function getAbilites(ability) {
@@ -297,7 +296,6 @@ async function generateNat() {
 
     NatStats.name = randomNat;
 
-    console.log(randomNat);
     for (let i = 0; i < NatStatsName.length; i++) {
       if (
         natureDetail.data.decreased_stat !== null &&
@@ -327,6 +325,7 @@ async function getExperience(level, pokeName) {
       `https://pokeapi.co/api/v2/pokemon-species/${pokeName}`
     );
 
+
     const growthRateName = growthRate.data.growth_rate.name;
     let totalExp = 0;
 
@@ -350,7 +349,15 @@ async function getExperience(level, pokeName) {
         return totalExp;
       }
       default: {
-        return "Invalid growth Rate Name";
+        let totalExp;
+        if (level <= 50) {
+          totalExp = Math.floor(0.8 * Math.pow(level, 3));
+        } else {
+          totalExp = Math.floor(
+            0.8 * Math.pow(50, 3) + 1.2 * Math.pow(level - 50, 3)
+          );
+        }
+        return totalExp;
       }
     }
   } catch (err) {
@@ -427,7 +434,7 @@ module.exports = {
   getBaseStats,
   generateIVs,
   generateNat,
-  getExperience
+  getExperience,
 };
 
 // const pokeTypes = getTypes(types);

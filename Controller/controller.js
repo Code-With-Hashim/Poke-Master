@@ -1,11 +1,15 @@
 const axios = require("axios");
 const pokemonjson = require("../sample.json");
 const TMsList = require('../TMList.json')
+let prevMessageId = null
 
 const fetchPokemonDetail = async (pokeId, typePokemon, bot, msg) => {
   const url = `https://pokeapi.co/api/v2/pokemon/${pokeId}`;
   const pokeDetail = await axios.get(url);
   const chatId = msg.chat.id;
+  prevMessageId = msg.message_id
+  
+  
 
   let name =
     pokeDetail.data.name.charAt(0).toUpperCase() +
@@ -15,7 +19,7 @@ const fetchPokemonDetail = async (pokeId, typePokemon, bot, msg) => {
   if (typePokemon === "shiny") {
     bot.sendMessage(chatId, "You found a shiny pokemon");
   }
-  await bot.sendPhoto(
+  const response = await bot.sendPhoto(
     chatId,
     typePokemon == "shiny"
       ? pokeDetail.data.sprites.other["official-artwork"].front_shiny
@@ -27,6 +31,9 @@ const fetchPokemonDetail = async (pokeId, typePokemon, bot, msg) => {
       parse_mode: "HTML",
     }
   );
+  prevMessageId = response.message_id
+  console.log(response.message_id)
+
 };
 
 function evYieldoptions(res , lvl) {
@@ -427,7 +434,6 @@ function getRandomLevel(minLevel, maxLevel) {
 
 
 
-
 module.exports = {
   getTMs,
   getRarePokemon,
@@ -438,4 +444,5 @@ module.exports = {
   getRandomPokemon,
   getMythicalPokemon,
   getLegendryPokemon,
+  getPreviousMessageId : () => prevMessageId
 };
