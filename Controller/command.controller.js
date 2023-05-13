@@ -1,5 +1,5 @@
 const { userModel } = require("../model/userDetail");
-const { battle } = require("./battle.controller");
+const { battle, battleBeginFight, statusBattleActive } = require("./battle.controller");
 const { megaStones, inventory, TM } = require("./callbackQuery.controller");
 const {
   getTMs,
@@ -9,6 +9,7 @@ const {
   getMythicalPokemon,
   getLegendryPokemon,
   getRarePokemon,
+  getPreviousMessageId,
 } = require("./controller");
 const {
   pokeStoreItems,
@@ -56,6 +57,14 @@ async function startCommand(bot, msg, match) {
 }
 
 function huntCommand(bot, msg) {
+  
+  if(statusBattleActive()) {
+    bot.sendMessage(msg.chat.id , "Cannot Hunt While battling" , {
+      reply_to_message_id : msg.message_id
+    })
+    return
+  }
+  
   const chatId = msg.chat.id;
   const userId = msg.from.id;
   const legendaryRate = 1.50  ; // 8
@@ -104,15 +113,23 @@ function callbackQuery(bot, query) {
 
   // Create a message with the text you want to display in the modal
   // console.log(option)
+  
+  console.log(statusBattleActive())
 
   switch (option) {
-
+    
+    case "fight" :{
+      battleBeginFight(bot , query)
+      break
+    }
+    
     case "ev_yield": {
       evYieldPopup(bot, query);
       break;
     }
     case "battle": {
       battle(bot , query)
+       
       break;
     }
     case "choosePokemon": {

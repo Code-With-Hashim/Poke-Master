@@ -15,7 +15,8 @@
     "dotenv": "^16.0.3",
     "mongoose": "^7.1.0",
     "node-telegram-bot-api": "^0.61.0",
-    "pokeapi-js-wrapper": "^1.2.2"
+    "pokeapi-js-wrapper": "^1.2.2",
+    "redis": "^4.6.6"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
