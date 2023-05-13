@@ -1,0 +1,36 @@
+{
+  "regular-balls": 1,
+  "great-balls": 1.5,
+  "ultra-balls": 2,
+  "master-balls": 255,
+  "safari-balls": 1.5,
+  "level-balls": [
+      { "threshold": 4, "multiplier": 8 },
+      { "threshold": 2, "multiplier": 4 }, 
+      { "threshold": 1, "multiplier": 2 }
+    ],
+  "fast-balls": {
+    "speedThreshold": 100,
+    "modifier": 4
+  },
+  "repeat-balls": {
+    "hasCaught": 3.5,
+    "modifier": 1
+  },
+  "nest-balls": {
+    "maxLevel": 30,
+    "modifier": {
+      "1": 1,   
+      "2": 2,   
+      "3": 4  
+    }
+  },
+  "net-balls": {
+    "typeThreshold": ["water", "bug"],
+    "modifier": 3.5
+  },
+  "quick-balls": {
+    "firstTurn": 5, 
+    "modifier": 1
+  }
+}
