@@ -9,8 +9,8 @@ const {
   getMythicalPokemon,
   getLegendryPokemon,
   getRarePokemon,
-  getPreviousMessageId,
 } = require("./controller");
+const { mypokeballs, pokeBack, catchPokemon } = require("./pokemonCatch.controller");
 const {
   pokeStoreItems,
   pokeBalls,
@@ -114,12 +114,20 @@ function callbackQuery(bot, query) {
   // Create a message with the text you want to display in the modal
   // console.log(option)
   
-  console.log(statusBattleActive())
+  
 
   switch (option) {
     
     case "fight" :{
       battleBeginFight(bot , query)
+      break
+    } 
+    case 'poke-back' : {
+      pokeBack(bot , query)
+      break
+    }
+    case 'catchPokemon' : {
+      catchPokemon(bot , query)
       break
     }
     
@@ -164,6 +172,11 @@ function callbackQuery(bot, query) {
       pokeMegaStore(bot, query);
       break;
     }
+    case "mypokeballs" : {
+      mypokeballs(bot , query)
+      break;
+    }
+    
     default: {
       console.log("Invalid options");
       return;

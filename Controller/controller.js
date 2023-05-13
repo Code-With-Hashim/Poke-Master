@@ -8,8 +8,7 @@ const fetchPokemonDetail = async (pokeId, typePokemon, bot, msg) => {
   const pokeDetail = await axios.get(url);
   const chatId = msg.chat.id;
   prevMessageId = msg.message_id
-  
-  
+  // console.log(prevMessageId)
 
   let name =
     pokeDetail.data.name.charAt(0).toUpperCase() +
@@ -17,9 +16,9 @@ const fetchPokemonDetail = async (pokeId, typePokemon, bot, msg) => {
   const level = await getMinMaxPokemonLevel(pokeDetail.data.name);
 
   if (typePokemon === "shiny") {
-    bot.sendMessage(chatId, "You found a shiny pokemon");
+    await bot.sendMessage(chatId, "You found a shiny pokemon");
   }
-  const response = await bot.sendPhoto(
+    await bot.sendPhoto(
     chatId,
     typePokemon == "shiny"
       ? pokeDetail.data.sprites.other["official-artwork"].front_shiny
@@ -31,8 +30,6 @@ const fetchPokemonDetail = async (pokeId, typePokemon, bot, msg) => {
       parse_mode: "HTML",
     }
   );
-  prevMessageId = response.message_id
-  console.log(response.message_id)
 
 };
 
@@ -267,7 +264,7 @@ async function getRandomPokemon(bot, msg, typePokemon) {
       return acc;
     }, {});
 
-    fetchPokemonDetail(randomPokemon.id, typePokemon, bot, msg);
+    await fetchPokemonDetail(randomPokemon.id, typePokemon, bot, msg);
     await bot.deleteMessage(msg.chat.id, message_id);
   } catch (err) {
     console.log(err);
@@ -444,5 +441,8 @@ module.exports = {
   getRandomPokemon,
   getMythicalPokemon,
   getLegendryPokemon,
+  setPreviousMessageId : () => {
+    prevMessageId = null
+  },
   getPreviousMessageId : () => prevMessageId
 };
