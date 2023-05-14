@@ -62,11 +62,11 @@ async function battle(bot, query) {
         `https://pokeapi.co/api/v2/pokemon/${pokemonName}`
       );
 
-      opponentPokemon = await getOpponentPokemon(
-        pokeDetail,
-        pokeLvl,
-        pokemonName
-      );
+      // opponentPokemon = await getOpponentPokemon(
+      //   pokeDetail,
+      //   pokeLvl,
+      //   pokemonName
+      // );
       getWildPokemon(pokeDetail,pokeLvl,pokemonName)
       trainerPokemon = await getTrainerPokemon(userId);
       selectPokemon = trainerPokemon[0]
