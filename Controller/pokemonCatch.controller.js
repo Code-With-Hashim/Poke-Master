@@ -218,7 +218,41 @@ async function isCaughtSuccess(bot, usePokeBall, chatId, message_id, userId) {
   });
 
   try {
+    
+    const pokeLimit = await userPokeModal.find({trainer : userId , group : 1 })
+    
+    if(pokeLimit.length < 6) {    
     await userPokeModal
+      .create({ ...wildPokemon(), trainer: userId , group : 1 })
+      .then(() => {
+        bot
+          .editMessageText("You Caught Wild Pokemon", {
+            chat_id: chatId,
+            message_id,
+          })
+          .then(() => {
+            bot.editMessageReplyMarkup(
+              {
+                inline_keyboard: [
+                  [
+                    { text: "View Poke Stats", callback_data: "viewPokeStats" },
+                    { text: "View Pokedex", callback_data: "viewPokedex" },
+                  ],
+                  [
+                    { text: "Nickname", callback_data: "nickname" },
+                    { text: "Release", callback_data: "relasePoke" },
+                  ],
+                ],
+              },
+              {
+                chat_id: chatId,
+                message_id,
+              }
+            );
+          });
+      });
+    } else {
+      await userPokeModal
       .create({ ...wildPokemon(), trainer: userId })
       .then(() => {
         bot
@@ -247,6 +281,8 @@ async function isCaughtSuccess(bot, usePokeBall, chatId, message_id, userId) {
             );
           });
       });
+    }
+    
   } catch (err) {
     console.log(err);
   }

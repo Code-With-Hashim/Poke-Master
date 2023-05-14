@@ -56,6 +56,7 @@ const userPokeSchema = new mongoose.Schema({
     specialDefense: { type: Number, default: 0 },
     speed: { type: Number, default: 0 },
   },
+  group : {type : Number},
   experience: { type: Number, required: true },
   trainer: { type: Number, required: true },
 });

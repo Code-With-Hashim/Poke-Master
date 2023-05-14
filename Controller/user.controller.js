@@ -60,6 +60,7 @@ async function choosePokemon(bot, query) {
       moves: pokeMoves,
       nature: pokeNat,
       type: pokeTypes,
+      group : 1,
       trainer,
     });
 
