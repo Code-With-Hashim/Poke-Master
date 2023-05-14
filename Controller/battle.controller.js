@@ -1,5 +1,4 @@
 const axios = require("axios");
-const fs = require("fs");
 const { userPokeModal } = require("../model/userPoke");
 const {
   mainPokemonStats,
@@ -15,10 +14,14 @@ const {
   getAbilites,
 } = require("./user.controller");
 let { getPreviousMessageId, setPreviousMessageId } = require("./controller");
+const { canHunt, startBattle, endBattle } = require("./battle.fnc");
+const { getWildPokemon } = require("./pokemon.controller");
+// const { wildPokemon } = require("./pokemon");
 let opponentPokemon = null;
+let selectPokemon = null
 let trainerPokemon = null;
 
-let isBattleActive = false;
+
 let isMoving;
 
 const baseStats = [
@@ -42,20 +45,20 @@ function generateEVs() {
 }
 
 async function battle(bot, query) {
-  const battle_id = query.message.reply_to_message.message_id;
+  const battle_id = query.message && query.message.reply_to_message && query.message.reply_to_message.message_id;
   const chatId = query.message.chat.id;
-  const userId = query.from.id;
+  const userId = query.from.id; 
   const pokemonName = query.data.trim().split(" ")[1];
   const pokeLvl = query.data.trim().split(" ").map(Number)[2];
   const prevMessageId = getPreviousMessageId();
 
   try {
-    if (!isBattleActive && prevMessageId !== battle_id) {
+    if (!canHunt(userId) && prevMessageId !== battle_id) {
       bot.answerCallbackQuery(query.id, "The Pokemon has fled");
-    } else if (isBattleActive) {
+    } else if (!canHunt(userId)) {
       bot.answerCallbackQuery(query.id, "You're Currently in Pokemon Battle");
     } else {
-      const pokeDetail = await axios.get(
+        const pokeDetail = await axios.get(
         `https://pokeapi.co/api/v2/pokemon/${pokemonName}`
       );
 
@@ -64,13 +67,15 @@ async function battle(bot, query) {
         pokeLvl,
         pokemonName
       );
+      getWildPokemon(pokeDetail,pokeLvl,pokemonName)
       trainerPokemon = await getTrainerPokemon(userId);
+      selectPokemon = trainerPokemon[0]
 
       const inline_keyboard = [];
 
       let moves_message = "";
       let trainerPokemonMoves = [];
-      trainerPokemon.moves.forEach((ele) => {
+      selectPokemon.moves.forEach((ele) => {
         let [first, second] = ele.name.split("-");
         first = first.charAt(0).toUpperCase() + first.slice(1);
         const text = `${second ? first + " " + second : first}`;
@@ -112,9 +117,9 @@ Lv. ${pokeLvl}  •  HP ${opponentPokemon.stats.totalhp}/${
 Current turn: <a href="tg://user?id=${query.from.id}">${
             query.from.first_name
           }</a>
-<b>${trainerPokemon.name}</b> [${trainerPokemon.type.join(", ")}]
-Lv. ${trainerPokemon.level}  •  HP ${trainerPokemon.stats.totalhp}/${
-            trainerPokemon.stats.totalhp
+<b>${selectPokemon.name}</b> [${selectPokemon.type.join(", ")}]
+Lv. ${selectPokemon.level}  •  HP ${selectPokemon.stats.totalhp}/${
+            selectPokemon.stats.totalhp
           }
 ███████████
 
@@ -127,8 +132,8 @@ ${moves_message}`,
           }
         )
         .then((res) => {
-          isBattleActive = true;
-          isPlayingMove(bot, chatId, res.message_id);
+          startBattle(userId)
+          isPlayingMove(bot, chatId, res.message_id , userId);
           bot.answerCallbackQuery(
             query.id,
             `Lower ${
@@ -142,16 +147,21 @@ ${moves_message}`,
   }
 }
 
-async function battleBeginFight(bot, query , command) {
+async function battleBeginFight(bot, query , command , pokeId) {
   const Prevkeyboard = query.message.reply_markup.inline_keyboard;
 
   const userId = query.from.id;
   const chatId = query.message.chat.id;
   const messageId = query.message.message_id;
+  
+  if(command === 'changePokemon'){
+    selectPokemon = trainerPokemon.filter(el => el.poke_id == pokeId)[0]
+  }
+
 
   try {
     const botTotalHP = opponentPokemon.stats.totalhp;
-    const trainerTotalHP = trainerPokemon.stats.totalhp;
+    const trainerTotalHP = selectPokemon.stats.totalhp;
     const movePower = query.data.split(" ").map(Number)[1];
     const moveType = query.data.trim().split(" ")[2];
     const moveName = query.data.trim().split(" ")[4];
@@ -168,15 +178,15 @@ async function battleBeginFight(bot, query , command) {
     const botChance = calculateHitChance(botMoveAccuracy);
     const myChance = calculateHitChance(moveAccuracy);
 
-    let myDamage =  command !== 'catchPokemon' && await calculateDamage(
-      trainerPokemon,
+    let myDamage =  command !== 'catchPokemon' && !pokeId && await calculateDamage(
+      selectPokemon,
       opponentPokemon,
       movePower,
       moveType
     )
     let botDamage = await calculateDamage(
       opponentPokemon,
-      trainerPokemon,
+      selectPokemon,
       botMovePower,
       botMoveType
     );
@@ -185,35 +195,47 @@ async function battleBeginFight(bot, query , command) {
       botDamage.Damage = 0;
       const randomMsg = [
         `The ${opponentPokemon.name} <b>${botMoveName}'s</b> Attack Misseed`,
-        `The ${trainerPokemon.name} dodged <b>${botMoveName}</b> Attack`,
+        `The ${selectPokemon.name} dodged <b>${botMoveName}</b> Attack`,
       ];
       const val = Math.floor(Math.random() * randomMsg.length - 0) + 0;
       botDamage.message = randomMsg[val];
     } else if (!myChance) {
       myDamage.Damage = 0;
       const randomMsg = [
-        `The ${trainerPokemon.name} <b>${moveName}'s</b> Attack Misseed`,
+        `The ${selectPokemon.name} <b>${moveName}'s</b> Attack Misseed`,
         `The ${opponentPokemon.name} dodged <b>${moveName}</b> Attack`,
       ];
       const val = Math.floor(Math.random() * randomMsg.length - 0) + 0;
       myDamage.message = randomMsg[val];
     }
+    
+    if(command === 'changePokemon') {
+      if(opponentPokemon.stats.speed > selectPokemon.stats.speed) {
+        selectPokemon.stats.currenthp = selectPokemon.stats.currenthp - botDamage.Damage;    
+      } else {
+        selectPokemon.stats.currenthp = selectPokemon.stats.currenthp - 0
+      }
+    } else {
+      
+      opponentPokemon.stats.currenthp = command !== 'catchPokemon' ? opponentPokemon.stats.currenthp - myDamage.Damage : opponentPokemon.stats.currenthp - 0
+    selectPokemon.stats.currenthp =
+      selectPokemon.stats.currenthp - botDamage.Damage;
+        
+    }
 
-    opponentPokemon.stats.currenthp = command !== 'catchPokemon' ? opponentPokemon.stats.currenthp - myDamage.Damage : opponentPokemon.stats.currenthp - 0
-    trainerPokemon.stats.currenthp =
-      trainerPokemon.stats.currenthp - botDamage.Damage;
+    
 
-    if (trainerPokemon.stats.currenthp < 0) {
-      trainerPokemon.stats.currenthp = 0;
+    if (selectPokemon.stats.currenthp < 0) {
+      selectPokemon.stats.currenthp = 0;
     }
     if (opponentPokemon.stats.currenthp < 0) {
       opponentPokemon.stats.currenthp = 0;
     }
 
     const botHP = (opponentPokemon.stats.currenthp / botTotalHP) * 100;
-    const trainerHP = (trainerPokemon.stats.currenthp / trainerTotalHP) * 100;
+    const trainerHP = (selectPokemon.stats.currenthp / trainerTotalHP) * 100;
     let moves_message = "";
-    trainerPokemon.moves.forEach((ele) => {
+    selectPokemon.moves.forEach((ele) => {
       let [first, second] = ele.name.split("-");
       first = first.charAt(0).toUpperCase() + first.slice(1);
       const text = `${second ? first + " " + second : first}`;
@@ -242,15 +264,64 @@ ${BotProgressBar}
 Current turn: <a href="tg://user?id=${query.from.id}">${
       query.from.first_name
     }</a>
-<b>${trainerPokemon.name}</b> [${trainerPokemon.type.join(", ")}]
-Lv. ${trainerPokemon.level}  •  HP <b>${
-      trainerPokemon.stats.currenthp
+<b>${selectPokemon.name}</b> [${selectPokemon.type.join(", ")}]
+Lv. ${selectPokemon.level}  •  HP <b>${
+      selectPokemon.stats.currenthp
     }/${trainerTotalHP}</b>
 ${trainerProgressBar}
 
 ${moves_message}`;
 
-    const myDamageMsg = command !== 'catchPokemon' && `${trainerPokemon.name} used <b>${ProperMoveName(
+
+ if(command === 'changePokemon') {
+   if(opponentPokemon.stats.speed > selectPokemon.stats.speed) {
+     Prev_message = `${ opponentPokemon.name.charAt(0).toUpperCase() +
+      opponentPokemon.name.slice(1)} speed Advantage allow to move first
+     ${
+      opponentPokemon.name.charAt(0).toUpperCase() +
+      opponentPokemon.name.slice(1)
+    } used <b>${botMoveName}</b>.
+${botDamage.message}.
+Dealt ${botDamage.Damage} damage.
+
+Wild <b>${opponentPokemon.name}</b> [${opponentPokemon.type.join(", ")}]
+Lv. ${opponentPokemon.level}  •  HP <b>${
+      opponentPokemon.stats.currenthp
+    }/${botTotalHP}</b>
+${BotProgressBar}
+
+Current turn: <a href="tg://user?id=${query.from.id}">${
+      query.from.first_name
+    }</a>
+<b>${selectPokemon.name}</b> [${selectPokemon.type.join(", ")}]
+Lv. ${selectPokemon.level}  •  HP <b>${
+      selectPokemon.stats.currenthp
+    }/${trainerTotalHP}</b>
+${trainerProgressBar}
+
+${moves_message}`;
+   } else {
+    Prev_message = `Your ${ProperMoveName(selectPokemon.name)} Pokemon speed Advantage allow to move first
+Wild <b>${opponentPokemon.name}</b> [${opponentPokemon.type.join(", ")}]
+Lv. ${opponentPokemon.level}  •  HP <b>${
+      opponentPokemon.stats.currenthp
+    }/${botTotalHP}</b>
+${BotProgressBar}
+
+Current turn: <a href="tg://user?id=${query.from.id}">${
+      query.from.first_name
+    }</a>
+<b>${selectPokemon.name}</b> [${selectPokemon.type.join(", ")}]
+Lv. ${selectPokemon.level}  •  HP <b>${
+      selectPokemon.stats.currenthp
+    }/${trainerTotalHP}</b>
+${trainerProgressBar}
+
+${moves_message}`
+   }
+ }
+
+    const myDamageMsg = command !== 'catchPokemon' && command !== 'changePokemon' && `${selectPokemon.name} used <b>${ProperMoveName(
       moveName
     )}</b>.
 ${myDamage.message}.
@@ -261,7 +332,7 @@ ${
 } attacking...
 `;
 
-      if(command !== 'catchPokemon') {
+      if(command !== 'catchPokemon' && command !== 'changePokemon') {
          await bot
       .editMessageText(myDamageMsg, {
         chat_id: chatId,
@@ -276,11 +347,11 @@ ${
 
     setTimeout(() => {
       if (opponentPokemon.stats.currenthp === 0) {
-        isBattleActive = false;
+        endBattle(userId)
         setPreviousMessageId();
         let weWinMessage = `${
-          trainerPokemon.name.charAt(0).toUpperCase() +
-          trainerPokemon.name.slice(1)
+          selectPokemon.name.charAt(0).toUpperCase() +
+          selectPokemon.name.slice(1)
         } used <b>${ProperMoveName(moveName)}</b>.
 <i>${myDamage.message}</i>
 
@@ -298,15 +369,15 @@ The wild ${
             parse_mode: "HTML",
           })
           .then(() => (isMoving = true));
-      } else if (trainerPokemon.stats.currenthp === 0) {
-        isBattleActive = false;
+      } else if (selectPokemon.stats.currenthp === 0) {
+        endBattle(userId)
         setPreviousMessageId();
         let botWinMessage = `${
           opponentPokemon.name.charAt(0).toUpperCase() +
           opponentPokemon.name.slice(1)
         } used <b>${ProperMoveName(botMoveName)}</b>.
 ${
-  trainerPokemon.name.charAt(0).toUpperCase() + trainerPokemon.name.slice(1)
+  selectPokemon.name.charAt(0).toUpperCase() + selectPokemon.name.slice(1)
 } fainted.
 
 Your entire team has fainted and the wild ${
@@ -359,19 +430,21 @@ function progressBar(hp) {
 }
 
 async function getTrainerPokemon(userId) {
+  const teamLoad = 1
   const pokeDetail = await userPokeModal
-    .findOne({ trainer: userId })
+    .find({ trainer: userId , group : teamLoad})
     .maxTime(30000);
-
-  const level = pokeDetail.level;
-  const pokeMoves = pokeDetail.moves;
-  const types = pokeDetail.type;
-  const abilities = pokeDetail.abilities;
-  const baseStats = pokeDetail.baseStats;
-  const pokeEVs = pokeDetail.ev;
-  const experience = pokeDetail.experience;
-  const pokeNat = pokeDetail.nature;
-  const pokeIVs = pokeDetail.iv;
+    
+    let myTeamArray = pokeDetail.map((pokes) => {
+      const level = pokes.level;
+  const pokeMoves = pokes.moves;
+  const types = pokes.type;
+  const abilities = pokes.abilities;
+  const baseStats = pokes.baseStats;
+  const pokeEVs = pokes.ev;
+  const experience = pokes.experience;
+  const pokeNat = pokes.nature;
+  const pokeIVs = pokes.iv;
 
   const mainStats = mainPokemonStats(
     baseStats,
@@ -382,14 +455,20 @@ async function getTrainerPokemon(userId) {
   );
 
   const myPokemon = {
-    name: pokeDetail.nickname ? pokeDetail.nickname : pokeDetail.name,
+    name: pokes.name,
+     nickname : pokes.nickname ? pokes.nickname : null,
+     poke_id : `${pokes._id}`,
     level,
     type: types,
     stats: mainStats,
     moves: pokeMoves,
   };
-
-  return myPokemon;
+   return myPokemon
+  
+  })
+  
+  return myTeamArray
+  
 }
 
 async function getOpponentPokemon(pokeDetail, pokeLvl, pokemonName) {
@@ -449,14 +528,14 @@ function ProperMoveName(moveName) {
   return fullMoveName;
 }
 
-function isPlayingMove(bot, chatId, message_id) {
+function isPlayingMove(bot, chatId, message_id , userId) {
   isMoving = setTimeout(() => {
-    isBattleActive &&
+    canHunt(userId) &&
       bot.editMessageText("The Pokemon has fled", {
         chat_id: chatId,
         message_id,
       });
-    isBattleActive = false;
+    endBattle(userId)
     setPreviousMessageId();
   }, 60000);
 }
@@ -481,19 +560,21 @@ function calculateHitChance(moveAccuracy) {
   // You can integrate this code into your existing battle or game logic to handle move accuracy and determine the outcome of moves.
 }
 
+
 module.exports = {
   battle,
   battleBeginFight,
-  setInActiveBattle : () => {
-    isBattleActive = false
-  },
-  setOpponentPokemonDmg : (damage) => {
-    console.log(damage)
-    opponentPokemon.stats.currenthp - damage
-  },
-  statusBattleActive: () => isBattleActive,
-  wildPokemon : () => opponentPokemon,
-  userPokemon : () => trainerPokemon,
+  // // setInActiveBattle : () => {
+  // //   isBattleActive = false
+  // // },
+  // setOpponentPokemonDmg : (damage) => {
+  //   console.log(damage)
+  //   opponentPokemon.stats.currenthp - damage
+  // },
+  // // statusBattleActive: () => isBattleActive,
+  // wildPokemon : () => opponentPokemon,
+  // userPokemon : () => selectPokemon,
+  getOpponentPokemon,
   ProperMoveName,
-  calculateDamage,
-};
+  calculateDamage
+}

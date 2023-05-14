@@ -1,5 +1,6 @@
 const { userModel } = require("../model/userDetail");
-const { battle, battleBeginFight, statusBattleActive } = require("./battle.controller");
+const { battle, battleBeginFight, statusBattleActive, getOpponentPokemon } = require("./battle.controller");
+const { canHunt } = require("./battle.fnc");
 const { megaStones, inventory, TM } = require("./callbackQuery.controller");
 const {
   getTMs,
@@ -10,6 +11,7 @@ const {
   getLegendryPokemon,
   getRarePokemon,
 } = require("./controller");
+const { myPokemonTeam, changeBattlePokemon } = require("./myBattlePokemon.controller");
 const { mypokeballs, pokeBack, catchPokemon, MyListPokeballs, pokemonCatch } = require("./pokemonCatch.controller");
 const {
   pokeStoreItems,
@@ -17,6 +19,7 @@ const {
   pokeMegaStore,
 } = require("./pokeStore.controller");
 const { choosePokemon, getInventory } = require("./user.controller");
+
 
 async function startCommand(bot, msg, match) {
   const chatId = msg.chat.id;
@@ -58,12 +61,7 @@ async function startCommand(bot, msg, match) {
 
 function huntCommand(bot, msg) {
   
-  if(statusBattleActive()) {
-    bot.sendMessage(msg.chat.id , "Cannot Hunt While battling" , {
-      reply_to_message_id : msg.message_id
-    })
-    return
-  }
+
   
   const chatId = msg.chat.id;
   const userId = msg.from.id;
@@ -78,6 +76,13 @@ function huntCommand(bot, msg) {
   const battle = 30 // 9
   
   const spawnRoll = Math.random() * 100
+  
+    if(!canHunt(userId)) {
+    bot.sendMessage(msg.chat.id , "Cannot Hunt While battling" , {
+      reply_to_message_id : msg.message_id
+    })
+    return
+  }
   
   if(spawnRoll <= mythicalShinyRate) {
     getMythicalPokemon(bot , msg , 'shiny')
@@ -118,6 +123,14 @@ function callbackQuery(bot, query) {
 
   switch (option) {
     
+    case 'changepokemon' : {
+      changeBattlePokemon(bot , query)
+      break
+    }
+    case 'mypokemonTeam' : {
+      myPokemonTeam(bot , query)
+      break;
+    }
     case "fight" :{
       battleBeginFight(bot , query , 'battle')
       break
