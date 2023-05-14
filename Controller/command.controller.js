@@ -10,7 +10,7 @@ const {
   getLegendryPokemon,
   getRarePokemon,
 } = require("./controller");
-const { mypokeballs, pokeBack, catchPokemon } = require("./pokemonCatch.controller");
+const { mypokeballs, pokeBack, catchPokemon, MyListPokeballs, pokemonCatch } = require("./pokemonCatch.controller");
 const {
   pokeStoreItems,
   pokeBalls,
@@ -114,12 +114,12 @@ function callbackQuery(bot, query) {
   // Create a message with the text you want to display in the modal
   // console.log(option)
   
-  
+
 
   switch (option) {
     
     case "fight" :{
-      battleBeginFight(bot , query)
+      battleBeginFight(bot , query , 'battle')
       break
     } 
     case 'poke-back' : {
@@ -127,7 +127,7 @@ function callbackQuery(bot, query) {
       break
     }
     case 'catchPokemon' : {
-      catchPokemon(bot , query)
+      pokemonCatch(bot , query)
       break
     }
     
@@ -173,7 +173,7 @@ function callbackQuery(bot, query) {
       break;
     }
     case "mypokeballs" : {
-      mypokeballs(bot , query)
+      MyListPokeballs(bot , query)
       break;
     }
     

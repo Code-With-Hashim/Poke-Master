@@ -142,7 +142,7 @@ ${moves_message}`,
   }
 }
 
-async function battleBeginFight(bot, query) {
+async function battleBeginFight(bot, query , command) {
   const Prevkeyboard = query.message.reply_markup.inline_keyboard;
 
   const userId = query.from.id;
@@ -157,20 +157,23 @@ async function battleBeginFight(bot, query) {
     const moveName = query.data.trim().split(" ")[4];
     const moveAccuracy = query.data.trim().split(" ").map(Number)[3];
     const randomMove = Math.floor(Math.random() * (opponentPokemon.moves.length-1));
+    console.log(opponentPokemon.moves.length)
     const botMovePower = opponentPokemon.moves[randomMove].power;
     const botMoveType = opponentPokemon.moves[randomMove].type;
     const botMoveName = opponentPokemon.moves[randomMove].name;
     const botMoveAccuracy = opponentPokemon.moves[randomMove].accuracy;
+    
+    console.log('check' , botMoveName)
 
     const botChance = calculateHitChance(botMoveAccuracy);
     const myChance = calculateHitChance(moveAccuracy);
 
-    let myDamage = await calculateDamage(
+    let myDamage =  command !== 'catchPokemon' && await calculateDamage(
       trainerPokemon,
       opponentPokemon,
       movePower,
       moveType
-    );
+    )
     let botDamage = await calculateDamage(
       opponentPokemon,
       trainerPokemon,
@@ -196,8 +199,7 @@ async function battleBeginFight(bot, query) {
       myDamage.message = randomMsg[val];
     }
 
-    opponentPokemon.stats.currenthp =
-      opponentPokemon.stats.currenthp - myDamage.Damage;
+    opponentPokemon.stats.currenthp = command !== 'catchPokemon' ? opponentPokemon.stats.currenthp - myDamage.Damage : opponentPokemon.stats.currenthp - 0
     trainerPokemon.stats.currenthp =
       trainerPokemon.stats.currenthp - botDamage.Damage;
 
@@ -248,7 +250,7 @@ ${trainerProgressBar}
 
 ${moves_message}`;
 
-    const myDamageMsg = `${trainerPokemon.name} used <b>${ProperMoveName(
+    const myDamageMsg = command !== 'catchPokemon' && `${trainerPokemon.name} used <b>${ProperMoveName(
       moveName
     )}</b>.
 ${myDamage.message}.
@@ -259,7 +261,8 @@ ${
 } attacking...
 `;
 
-    bot
+      if(command !== 'catchPokemon') {
+         await bot
       .editMessageText(myDamageMsg, {
         chat_id: chatId,
         message_id: query.message.message_id,
@@ -269,6 +272,7 @@ ${
         clearTimeout(isMoving);
         isPlayingMove(bot, chatId, messageId);
       });
+      }
 
     setTimeout(() => {
       if (opponentPokemon.stats.currenthp === 0) {
@@ -297,7 +301,6 @@ The wild ${
       } else if (trainerPokemon.stats.currenthp === 0) {
         isBattleActive = false;
         setPreviousMessageId();
-
         let botWinMessage = `${
           opponentPokemon.name.charAt(0).toUpperCase() +
           opponentPokemon.name.slice(1)
@@ -418,8 +421,9 @@ async function getOpponentPokemon(pokeDetail, pokeLvl, pokemonName) {
     level: pokeLvl,
     iv: pokeIVs,
     ev: pokeEVs,
-    abilites : pokeAbilities,
-    baseStats : stats, 
+    abilities : pokeAbilities,
+    baseStats : pokeBaseStats,
+    nature : pokeNat, 
     experience: pokeExp,
     type: pokeTypes,
     stats: mainStats,
@@ -434,6 +438,7 @@ async function getOpponentPokemon(pokeDetail, pokeLvl, pokemonName) {
 }
 
 function ProperMoveName(moveName) {
+  // console.log(moveName)
   let [first, second] = moveName.trim().split("-");
 
   first = first.charAt(0).toUpperCase() + first.slice(1);
@@ -479,8 +484,16 @@ function calculateHitChance(moveAccuracy) {
 module.exports = {
   battle,
   battleBeginFight,
+  setInActiveBattle : () => {
+    isBattleActive = false
+  },
+  setOpponentPokemonDmg : (damage) => {
+    console.log(damage)
+    opponentPokemon.stats.currenthp - damage
+  },
   statusBattleActive: () => isBattleActive,
   wildPokemon : () => opponentPokemon,
   userPokemon : () => trainerPokemon,
-  ProperMoveName
+  ProperMoveName,
+  calculateDamage,
 };
