@@ -1,5 +1,5 @@
 const { userModel } = require("../model/userDetail");
-const { battle, battleBeginFight, statusBattleActive, getOpponentPokemon } = require("./battle.controller");
+const { battle, battleBeginFight, statusBattleActive } = require("./battle.controller");
 const { canHunt } = require("./battle.fnc");
 const { megaStones, inventory, TM } = require("./callbackQuery.controller");
 const {

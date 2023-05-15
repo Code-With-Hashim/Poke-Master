@@ -183,7 +183,6 @@ async function getMoves(moves, pokeLvl) {
     }
     return moves_name;
 
-    console.log(moves);
   } catch (error) {
     console.log(error);
   }

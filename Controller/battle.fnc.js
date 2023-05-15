@@ -1,5 +1,3 @@
-const { getOpponentPokemon } = require("./battle.controller")
-
 const users = {}
 
 function startBattle (userId) {

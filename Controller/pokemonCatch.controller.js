@@ -4,14 +4,12 @@ const { userModel } = require("../model/userDetail");
 const { userInvModal } = require("../model/userInventory");
 const { userPokeModal } = require("../model/userPoke");
 const {
-  userPokemon,
   wildPokemon,
   ProperMoveName,
-  setInActiveBattle,
-  calculateDamage,
-  setOpponentPokemonDmg,
   battleBeginFight,
 } = require("./battle.controller");
+const { endBattle } = require("./battle.fnc");
+const { selectPokemon, getWildPokemon } = require("./pokemon.controller");
 
 let reply_markup;
 
@@ -96,14 +94,14 @@ async function pokemonCatch(bot, query) {
   const usePokeBall = query.data.trim().split(" ")[1]; //ballName
 
   try {
-    const userPokemonLevel = userPokemon().level; // level
-    const wildPokemonLevel = wildPokemon().level; //wildLevel
-    const hasCaught = await userHavePokemon(wildPokemon().name, userId); // hasCaught
-    const wildBaseSpeed = wildPokemon().baseStats.speed; // baseSpeed
-    const wildTypes = wildPokemon().type; // types
-    const maxHP = wildPokemon().stats.totalhp; //maxHP
-    const currentHP = wildPokemon().stats.currenthp;
-    const catchRate = await getWildCatchRate(wildPokemon().name);
+    const userPokemonLevel = selectPokemon(userId).level; // level
+    const wildPokemonLevel = getWildPokemon(userId).level; //wildLevel
+    const hasCaught = await userHavePokemon(getWildPokemon(userId).name, userId); // hasCaught
+    const wildBaseSpeed = getWildPokemon(userId).baseStats.speed; // baseSpeed
+    const wildTypes = getWildPokemon(userId).type; // types
+    const maxHP = getWildPokemon(userId).stats.totalhp; //maxHP
+    const currentHP = getWildPokemon(userId).stats.currenthp;
+    const catchRate = await getWildCatchRate(getWildPokemon(userId).name);
     const ballModifier = calculateBallModifier(
       usePokeBall,
       userPokemonLevel,
@@ -114,7 +112,7 @@ async function pokemonCatch(bot, query) {
     );
     const statusModifier = 1;
     const randomMove = Math.floor(
-      Math.random() * (wildPokemon().moves.length - 1)
+      Math.random() * (getWildPokemon(userId).moves.length - 1)
     );
 
     const catchChance = calculateCatchRate(
@@ -155,7 +153,7 @@ async function pokemonCatch(bot, query) {
             count++;
             if (count >= MakeCount && isCaught) {
               isCaughtSuccess(bot, usePokeBall, chatId, message_id, userId);
-              setInActiveBattle();
+              endBattle(userId);
               clearInterval(InterValId);
             } else if (count >= MakeCount && !isCaught) {
               isCaughtFailed(wildPokemon, usePokeBall, bot, chatId, message_id , delay , userId , query);
@@ -223,7 +221,7 @@ async function isCaughtSuccess(bot, usePokeBall, chatId, message_id, userId) {
     
     if(pokeLimit.length < 6) {    
     await userPokeModal
-      .create({ ...wildPokemon(), trainer: userId , group : 1 })
+      .create({ ...getWildPokemon(userId), trainer: userId , group : 1 })
       .then(() => {
         bot
           .editMessageText("You Caught Wild Pokemon", {
@@ -253,7 +251,7 @@ async function isCaughtSuccess(bot, usePokeBall, chatId, message_id, userId) {
       });
     } else {
       await userPokeModal
-      .create({ ...wildPokemon(), trainer: userId })
+      .create({ ...getWildPokemon(userId), trainer: userId })
       .then(() => {
         bot
           .editMessageText("You Caught Wild Pokemon", {
@@ -293,7 +291,7 @@ async function isCaughtFailed(wildPokemon, usePokeBall, bot, chatId, message_id 
     
   message = `You're ${ProperMoveName(
     usePokeBall
-  )} has failed \n\n ${ProperMoveName(wildPokemon().name)} attacking...`;
+  )} has failed \n\n ${ProperMoveName(getWildPokemon(userId).name)} attacking...`;
   bot.editMessageText(message, {
     chat_id: chatId,
     message_id,
