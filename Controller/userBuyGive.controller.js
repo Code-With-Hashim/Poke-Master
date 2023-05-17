@@ -1,6 +1,5 @@
 const { PokeMartModel } = require("../model/pokeStore.model");
 const { userInvModal } = require("../model/userInventory");
-const { getOpponentPokemon } = require("./battle.controller");
 
 async function userBuyCommand(bot, msg, match) {
   const userId = msg.from.id;

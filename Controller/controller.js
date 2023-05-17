@@ -1,14 +1,14 @@
 const axios = require("axios");
 const pokemonjson = require("../sample.json");
-const TMsList = require('../TMList.json')
-let prevMessageId = null
+const TMsList = require('../TMList.json');
+const { setPreviousMessageId } = require("./battle.fnc");
 
 const fetchPokemonDetail = async (pokeId, typePokemon, bot, msg) => {
   const url = `https://pokeapi.co/api/v2/pokemon/${pokeId}`;
   const pokeDetail = await axios.get(url);
   const chatId = msg.chat.id;
-  prevMessageId = msg.message_id
-  // console.log(prevMessageId)
+  const userId = msg.from.id
+  setPreviousMessageId(userId , msg.message_id)
 
   let name =
     pokeDetail.data.name.charAt(0).toUpperCase() +
@@ -441,8 +441,4 @@ module.exports = {
   getRandomPokemon,
   getMythicalPokemon,
   getLegendryPokemon,
-  setPreviousMessageId : () => {
-    prevMessageId = null
-  },
-  getPreviousMessageId : () => prevMessageId
 };

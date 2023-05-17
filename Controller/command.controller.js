@@ -1,6 +1,6 @@
 const { userModel } = require("../model/userDetail");
-const { battle, battleBeginFight, statusBattleActive, getOpponentPokemon } = require("./battle.controller");
-const { canHunt } = require("./battle.fnc");
+const { battle, battleBeginFight, statusBattleActive, gameExitinBattle } = require("./battle.controller");
+const { canHunt, isBattleActive } = require("./battle.fnc");
 const { megaStones, inventory, TM } = require("./callbackQuery.controller");
 const {
   getTMs,
@@ -77,7 +77,7 @@ function huntCommand(bot, msg) {
   
   const spawnRoll = Math.random() * 100
   
-    if(!canHunt(userId)) {
+    if(isBattleActive(userId)) {
     bot.sendMessage(msg.chat.id , "Cannot Hunt While battling" , {
       reply_to_message_id : msg.message_id
     })
@@ -127,9 +127,17 @@ function callbackQuery(bot, query) {
       changeBattlePokemon(bot , query)
       break
     }
+    case 'game_left' : {
+      gameExitinBattle(bot , query)
+      break
+    }
     case 'mypokemonTeam' : {
       myPokemonTeam(bot , query)
       break;
+    }
+    case 'feint' : {
+      bot.answerCallbackQuery(query.id , 'This Pokemon has feint')
+      break
     }
     case "fight" :{
       battleBeginFight(bot , query , 'battle')

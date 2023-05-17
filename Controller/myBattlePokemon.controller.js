@@ -1,37 +1,27 @@
 const {userPokeModal} = require('../model/userPoke')
-const { ProperMoveName, battle, battleBeginFight } = require('./battle.controller')
+const { ProperMoveName, battleBeginFight } = require('./battle.controller')
+const { getPokemonTeam, selectPokemon, getPokemonMoves, getCurrentPokemon, getPokemonTrainerList } = require('./pokemon.controller')
+
 
 async function myPokemonTeam(bot , query) {
     
     const userTeamLoad = 1
     const chatId = query.message.chat.id
     const userId = query.from.id
+    const trainerPokemonList = getPokemonTrainerList(userId)
     
     
     try {
         
-        const myPokemonTeam = await userPokeModal.find({trainer : userId , group : userTeamLoad}).limit(6)
-        const inline_team = []
+         const inline_team = getPokemonTeam(userId)
         
-        let trainerPoke = []
-        myPokemonTeam.forEach((el) => {
-            trainerPoke.push({
-                text : el.nickname ? ProperMoveName(el.name) : ProperMoveName(el.name),
-                callback_data : `changepokemon ${el._id}`
-            })
-            
-            if(trainerPoke.length%2 == 0) {
-                inline_team.push(trainerPoke)
-                trainerPoke = []
-            } 
-        })
         inline_team.push([{
             text : "🔙",
             callback_data : 'poke-back'
         }])
+
         
-        
-        if(myPokemonTeam.length <= 1 ) {
+        if(trainerPokemonList.length <= 1 ) {
             bot.answerCallbackQuery(query.id  , 'You have no more pokemon')
         } else {
             bot.editMessageReplyMarkup({inline_keyboard : inline_team} , {
@@ -51,11 +41,17 @@ async function myPokemonTeam(bot , query) {
 
 function changeBattlePokemon(bot , query) {
     const pokeId = query.data.trim().split(" ")[1]
-    
-    
+    const userId = query.from.id
+     const currentPokemon = getCurrentPokemon(userId)
     
     try {
-        battleBeginFight(bot , query , 'changePokemon' , pokeId)
+        
+        if(currentPokemon.poke_id === pokeId) {
+            bot.answerCallbackQuery(query.id , "You're already play with pokemon")
+        } else {
+            battleBeginFight(bot , query , 'changePokemon' , pokeId)
+        }
+        
     } catch(err) {
         console.log(err )
     }
