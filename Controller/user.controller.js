@@ -54,7 +54,7 @@ async function choosePokemon(bot, query) {
       name: pokemonName,
       abilities: pokeAbilities,
       baseStats: pokeBaseStats,
-      experience: pokeExp,
+      experience: pokeExp.totalExp,
       iv: pokeIVs,
       level: pokeLvl,
       moves: pokeMoves,
@@ -155,8 +155,9 @@ async function getMoves(moves, pokeLvl) {
       for (let j = 0; j < movesVersion.length; j++) {
         const moveLearnMethod = movesVersion[j].move_learn_method.name;
         const lvlLearnedAt = movesVersion[j].level_learned_at;
+        const groupVersion = movesVersion[j].version_group.name
 
-        if (moveLearnMethod === "level-up" && lvlLearnedAt <= pokeLvl) {
+        if (groupVersion === 'diamond-pearl' && moveLearnMethod === "level-up" && lvlLearnedAt <= pokeLvl) {
           // moves_name.push(move_name)
           // console.log(move_name , lvlLearnedAt)
           const pokePower = await axios.get(moves[i].move.url);
@@ -165,18 +166,29 @@ async function getMoves(moves, pokeLvl) {
             accuracy,
             type: { name },
           } = pokePower.data;
+          const category = pokePower.data.damage_class.name
 
           if (power !== null && accuracy !== null) {
             moves_name.push({
               name: move_name,
               power,
               accuracy,
+              category,
               type: name,
             });
           }
           break;
         }
       }
+    }
+    if(moves_name.length <= 0) {
+        moves_name.push({
+              name: 'struggle',
+              power : 50,
+              accuracy : 100,
+              category : 'physical',
+              type: 'normal'
+            });
     }
     while (moves_name.length > 4) {
       moves_name.shift();
@@ -328,36 +340,53 @@ async function getExperience(level, pokeName) {
 
     const growthRateName = growthRate.data.growth_rate.name;
     let totalExp = 0;
+    let nextExp = 0
+    
 
     switch (growthRateName) {
       case "fast": {
         totalExp = Math.floor(0.8 * Math.pow(level, 3));
-        return totalExp;
+        nextExp = Math.floor(0.8 * Math.pow((level+1), 3));
+        return {totalExp , nextExp};
       }
       case "medium-fast": {
         totalExp = Math.floor(level ** 3);
-        return totalExp;
+        nextExp = Math.floor((level+1) ** 3);
+        
+        return {totalExp , nextExp};
+        
       }
       case "medium-slow": {
         totalExp = Math.floor(
           1.2 * Math.pow(level, 3) - 15 * Math.pow(level, 2) + 100 * level - 140
         );
-        return totalExp;
+        nextExp = Math.floor(
+          1.2 * Math.pow((level+1), 3) - 15 * Math.pow((level+1), 2) + 100 * (level+1) - 140
+        );
+         return {totalExp , nextExp};
+
       }
       case "slow": {
         totalExp = Math.floor(1.25 * Math.pow(level, 3));
-        return totalExp;
+         nextExp = Math.floor(1.25 * Math.pow((level+1), 3));
+       return {totalExp , nextExp};
+
       }
       default: {
         let totalExp;
         if (level <= 50) {
           totalExp = Math.floor(0.8 * Math.pow(level, 3));
+          nextExp =Math.floor(0.8 * Math.pow((level+1), 3));
         } else {
           totalExp = Math.floor(
             0.8 * Math.pow(50, 3) + 1.2 * Math.pow(level - 50, 3)
           );
+          nextExp = Math.floor(
+            0.8 * Math.pow(50, 3) + 1.2 * Math.pow((level+1) - 50, 3)
+          );
         }
-        return totalExp;
+          return {totalExp , nextExp};
+
       }
     }
   } catch (err) {

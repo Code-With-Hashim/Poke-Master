@@ -1,6 +1,6 @@
 const {userPokeModal} = require('../model/userPoke')
 const { ProperMoveName, battleBeginFight } = require('./battle.controller')
-const { getPokemonTeam, selectPokemon, getPokemonMoves, getCurrentPokemon } = require('./pokemon.controller')
+const { getPokemonTeam, selectPokemon, getPokemonMoves, getCurrentPokemon, getPokemonTrainerList } = require('./pokemon.controller')
 
 
 async function myPokemonTeam(bot , query) {
@@ -8,6 +8,7 @@ async function myPokemonTeam(bot , query) {
     const userTeamLoad = 1
     const chatId = query.message.chat.id
     const userId = query.from.id
+    const trainerPokemonList = getPokemonTrainerList(userId)
     
     
     try {
@@ -20,15 +21,15 @@ async function myPokemonTeam(bot , query) {
         }])
 
         
-        // if(mypokemonteam.length <= 1 ) {
-        //     bot.answerCallbackQuery(query.id  , 'You have no more pokemon')
-        // } else {
+        if(trainerPokemonList.length <= 1 ) {
+            bot.answerCallbackQuery(query.id  , 'You have no more pokemon')
+        } else {
             bot.editMessageReplyMarkup({inline_keyboard : inline_team} , {
                 chat_id : chatId,
                 message_id : query.message.message_id
             })
 
-        // }
+        }
         
 
         

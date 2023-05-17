@@ -13,10 +13,8 @@ const {
   getExperience,
   getAbilites,
 } = require("./user.controller");
-let { getPreviousMessageId, setPreviousMessageId } = require("./controller");
-const { canHunt, startBattle, endBattle } = require("./battle.fnc");
+const { isBattleActive, startBattle, endBattle, getPreviousMessageId, setPreviousMessageId, isTrainerMove } = require("./battle.fnc");
 const {
-  trainerBattlePokemon,
   getBattleWildPokemon,
   dealtDamage,
   getWildPokemon,
@@ -25,10 +23,11 @@ const {
   makeProperName,
   previousPokemonname,
   myPokemonTeam,
+  isAllTeamFaint,
 } = require("./pokemon.controller");
-const { battleBeginMsg, fledPokemonMsg, movesMsg, battleBeginMoves, WildPokemonOutMsg, changePokemonMsgAttack, choosePokemonMsgwhileBattle } = require("../Message Format/BattleMsg");
+const { battleBeginMsg, fledPokemonMsg, movesMsg, battleBeginMoves, WildPokemonOutMsg, changePokemonMsgAttack, choosePokemonMsgwhileBattle, allTeamFaint } = require("../Message Format/BattleMsg");
+const { gainExpwithWildPokemon, wildExperienceGained, gainEvs } = require("./pokemonGain.controller");
 
-let isMoving;
 
 const baseStats = [
   "hp",
@@ -59,12 +58,13 @@ async function battle(bot, query) {
   const userId = query.from.id;
   const pokemonName = query.data.trim().split(" ")[1];
   const pokeLvl = query.data.trim().split(" ").map(Number)[2];
-  const prevMessageId = getPreviousMessageId();
-
+          
+  
+  
   try {
-    if (!canHunt(userId) && prevMessageId !== battle_id) {
+    if (!isBattleActive(userId) && !getPreviousMessageId(userId , battle_id)) {
       bot.answerCallbackQuery(query.id, "The Pokemon has fled");
-    } else if (!canHunt(userId)) {
+    } else if (isBattleActive(userId)) {
       bot.answerCallbackQuery(query.id, "You're Currently in Pokemon Battle");
     } else {
       const pokeDetail = await axios.get(
@@ -85,10 +85,13 @@ async function battle(bot, query) {
       const trainerBattlePokemon = pokeBattleDetail.selectPokemon;
       const wildPokemon = pokeBattleDetail.wildPokemon;
 
-      const inline_keyboard = [];
+      const inline_keyboard = [
+        [],
+        []
+      ];
 
       let moves_message = "";
-      let trainerPokemonMoves = [];
+
       trainerBattlePokemon.moves.forEach((ele) => {
         let [first, second] = ele.name.split("-");
         first = first.charAt(0).toUpperCase() + first.slice(1);
@@ -99,13 +102,16 @@ async function battle(bot, query) {
   Power:   ${ele.power},     Accuracy: ${ele.accuracy}
   `;
 
-        trainerPokemonMoves.push({
+        if (inline_keyboard[0].length !== 2) {
+          inline_keyboard[0].push({
           text,
           callback_data,
         });
-        if (trainerPokemonMoves.length % 2 === 0) {
-          inline_keyboard.push(trainerPokemonMoves);
-          trainerPokemonMoves = [];
+        } else if(inline_keyboard[1].length !== 2) {
+          inline_keyboard[1].push({
+          text,
+          callback_data,
+        });
         }
       });
 
@@ -114,6 +120,8 @@ async function battle(bot, query) {
         { text: "Run", callback_data: "game_left" },
         { text: "Pokemon", callback_data: "mypokemonTeam" },
       ]);
+      
+      
 
       await bot
         .sendMessage(
@@ -141,6 +149,7 @@ async function battle(bot, query) {
 }
 
 async function battleBeginFight(bot, query, command, pokeId) {
+  
   let Prevkeyboard = query.message.reply_markup.inline_keyboard;
 
   const userId = query.from.id;
@@ -148,6 +157,8 @@ async function battleBeginFight(bot, query, command, pokeId) {
   const messageId = query.message.message_id;
   const wildPokemon = getWildPokemon(userId);
   const trainerBattlePokemon = selectPokemon(userId, pokeId);
+  
+ 
 
   if (pokeId) {
     bot.answerCallbackQuery(query.id , `Go ${makeProperName(trainerBattlePokemon.name)}`)
@@ -168,6 +179,7 @@ async function battleBeginFight(bot, query, command, pokeId) {
     const botMoveType = wildPokemon.moves[randomMove].type;
     const botMoveName = wildPokemon.moves[randomMove].name;
     const botMoveAccuracy = wildPokemon.moves[randomMove].accuracy;
+    
 
     const botChance = calculateHitChance(botMoveAccuracy);
     const myChance = calculateHitChance(moveAccuracy);
@@ -191,7 +203,6 @@ async function battleBeginFight(bot, query, command, pokeId) {
     if(command !== 'catchPokemon' && command !== 'changePokemon') {
        dealtDamage(bot, query, botDamage, myDamage, userId, pokeId);
     }
-     
 
     // if (!botChance) {
     //   botDamage.Damage = 0;
@@ -224,10 +235,31 @@ async function battleBeginFight(bot, query, command, pokeId) {
 
     if (trainerBattlePokemon.stats.currenthp <= 0) {
       trainerBattlePokemon.stats.currenthp = 0;
+      gainExpwithWildPokemon(bot , query , wildPokemon ,  userId)
+      wildExperienceGained(wildPokemon , userId)
+      gainEvs(wildPokemon , userId , 'wild')
+      if(isAllTeamFaint(userId)) {
+    const message = allTeamFaint({wildPokemon , botMoveName , trainerBattlePokemon , botDamage})
+    bot.editMessageText(message , {
+      chat_id : chatId,
+      message_id : messageId,
+      parse_mode : 'HTML'
+    })
+    endBattle(userId)
+    return
+  }
+      
     }
     if (wildPokemon.stats.currenthp <= 0) {
       wildPokemon.stats.currenthp = 0;
+      gainExpwithWildPokemon(wildPokemon ,  userId)
+       gainEvs(wildPokemon , userId , 'win')
     }
+    
+     
+  
+  
+
 
     const botHP = (wildPokemon.stats.currenthp / botTotalHP) * 100;
     const trainerHP =
@@ -254,8 +286,8 @@ async function battleBeginFight(bot, query, command, pokeId) {
           parse_mode: "HTML",
         })
         .then(() => {
-          clearTimeout(isMoving);
-          isPlayingMove(bot, chatId, messageId);
+           clearTimeout(isTrainerMove(userId));
+         isBattleActive(userId) && isPlayingMove(bot, chatId, messageId);
         });
         
     }
@@ -272,8 +304,9 @@ async function battleBeginFight(bot, query, command, pokeId) {
           parse_mode: "HTML",
         })
         .then(() => {
-          clearTimeout(isMoving);
-          isPlayingMove(bot, chatId, messageId);
+          // console.log(isTrainerMove(userId))
+          clearTimeout(isTrainerMove(userId));
+         isBattleActive(userId) && isPlayingMove(bot, chatId, messageId);
         });
       } else if (wildPokemon.stats.speed > trainerBattlePokemon.stats.speed) {
           await bot
@@ -283,8 +316,8 @@ async function battleBeginFight(bot, query, command, pokeId) {
           parse_mode: "HTML",
         })
         .then(() => {
-          clearTimeout(isMoving);
-          isPlayingMove(bot, chatId, messageId);
+          clearTimeout(isTrainerMove(userId));
+          isBattleActive(userId) && isPlayingMove(bot, chatId, messageId);
         });
       }
       
@@ -295,14 +328,14 @@ async function battleBeginFight(bot, query, command, pokeId) {
       
       if(wildPokemon.stats.currenthp <= 0) {
         endBattle(userId)
-      } else if (trainerBattlePokemon.stats.currenthp === 0) {
+      } else if (trainerBattlePokemon.stats.currenthp <= 0) {
          
         let message = choosePokemonMsgwhileBattle({trainerBattlePokemon , trainerProgressBar , wildPokemon , userId , botMoveName , BotProgressBar , query })
 
          myPokemonTeam(bot , query , message)
          
       } else {
-        !canHunt(userId) && bot
+        isBattleActive(userId) && bot
           .editMessageText(Prev_message, {
             chat_id: chatId,
             message_id: messageId,
@@ -356,13 +389,15 @@ async function getTrainerPokemon(userId) {
     const experience = pokes.experience;
     const pokeNat = pokes.nature;
     const pokeIVs = pokes.iv;
+    
+    // console.log('line : 365' , experience)
 
     const mainStats = mainPokemonStats(
       baseStats,
       pokeIVs,
       pokeEVs,
       level,
-      pokeNat
+      pokeNat,
     );
 
     const myPokemon = {
@@ -373,6 +408,9 @@ async function getTrainerPokemon(userId) {
       type: types,
       stats: mainStats,
       moves: pokeMoves,
+      ev : pokeEVs,
+      iv : pokeIVs,
+      experience :  experience
     };
     return myPokemon;
   });
@@ -411,7 +449,7 @@ async function getOpponentPokemon(pokeDetail, pokeLvl, pokemonName) {
       abilities: pokeAbilities,
       baseStats: pokeBaseStats,
       nature: pokeNat,
-      experience: pokeExp,
+      experience: pokeExp.totalExp,
       type: pokeTypes,
       stats: mainStats,
       moves: pokeMoves,
@@ -420,6 +458,8 @@ async function getOpponentPokemon(pokeDetail, pokeLvl, pokemonName) {
     console.log(err);
   }
 }
+
+// function getMovesList ()
 
 function ProperMoveName(moveName) {
   // console.log(moveName)
@@ -434,15 +474,20 @@ function ProperMoveName(moveName) {
 }
 
 function isPlayingMove(bot, chatId, message_id, userId) {
-  isMoving = setTimeout(() => {
-    canHunt(userId) &&
+  
+  const isMoving = setTimeout(() => {
+     isBattleActive(userId) &&
       bot.editMessageText("The Pokemon has fled", {
         chat_id: chatId,
         message_id,
-      });
-    endBattle(userId);
-    setPreviousMessageId();
-  }, 60000);
+      }).then(() => {
+        endBattle(userId)
+      })
+    
+    setPreviousMessageId(userId , null);
+  }, 10000);
+  
+  isTrainerMove(userId , isMoving)
 }
 
 function calculateHitChance(moveAccuracy) {
@@ -465,9 +510,22 @@ function calculateHitChance(moveAccuracy) {
   // You can integrate this code into your existing battle or game logic to handle move accuracy and determine the outcome of moves.
 }
 
+function gameExitinBattle(bot , query) {
+   const randomBoolean = Math.random() < 0.5
+   
+    if(randomBoolean) {
+      bot.answerCallbackQuery(query.id , 'Failed to escape')
+    } else {
+      bot.answerCallbackQuery(query.id , 'You go away safely')
+    }
+    
+    return randomBoolean
+} 
+
 module.exports = {
   battle,
   battleBeginFight,
   ProperMoveName,
   calculateDamage,
+  gameExitinBattle
 };

@@ -1,5 +1,5 @@
 const { endBattle } = require("../Controller/battle.fnc")
-const { makeProperName, getPokemonMoves, previousPokemonname } = require("../Controller/pokemon.controller")
+const { makeProperName, getPokemonMoves, previousPokemonname, getCurrentPokemon } = require("../Controller/pokemon.controller")
 
 function battleBeginMsg({pokemonName , wildPokemon , trainerBattlePokemon , query , pokeLvl , moves_message}) {
       const BattleBeginMsg =  ` Battle begins!
@@ -153,7 +153,7 @@ function changePokemonMsgAttack({userId , trainerBattlePokemon , wildPokemon}) {
 
 function makeProperMoveName(moveName) {
   // console.log(moveName)
-  console.log(moveName)
+  console.log('line' , moveName)
   let [first, second] = moveName.trim().split("-");
 
   first = first.charAt(0).toUpperCase() + first.slice(1);
@@ -169,7 +169,7 @@ function choosePokemonMsgwhileBattle({trainerBattlePokemon , trainerProgressBar 
     let firstLine = ""
         
     let message = `${makeProperName(wildPokemon.name)} used <b>${makeProperMoveName(botMoveName)}</b>.
-${makeProperName(previousPokemonname(userId).name)} fainted.
+${makeProperName(getCurrentPokemon(userId).name)} fainted.
 
 Wild <b>${makeProperName(wildPokemon.name)}</b> [${wildPokemon.type.join(", ")}]
   Lv. ${wildPokemon.level}  •  HP <b>${
@@ -180,7 +180,7 @@ Wild <b>${makeProperName(wildPokemon.name)}</b> [${wildPokemon.type.join(", ")}]
   Current turn: <a href="tg://user?id=${query.from.id}">${
       query.from.first_name
     }</a>
-  <b>${makeProperName(previousPokemonname(userId).name)}</b> [${trainerBattlePokemon.type.join(", ")}]
+  <b>${makeProperName(getCurrentPokemon(userId).name)}</b> [${trainerBattlePokemon.type.join(", ")}]
   Lv. ${trainerBattlePokemon.level}  •  HP <b>${
       trainerBattlePokemon.stats.currenthp
     }/${trainerBattlePokemon.stats.totalhp}</b>
@@ -192,13 +192,24 @@ return message
 
 }
 
+function allTeamFaint({wildPokemon , botMoveName , trainerBattlePokemon , botDamage}) {
+  const message = `${makeProperName(wildPokemon.name)} used <b>${makeProperMoveName(botMoveName)}</b>.
+<i>${botDamage.message}.</i>
+${makeProperName(trainerBattlePokemon.name)} fainted.
+
+Your entire team has fainted and the wild ${makeProperName(wildPokemon.name)} has fled.`
+
+return message
+}
 
 
 module.exports = {battleBeginMsg ,
+allTeamFaint,
  fledPokemonMsg , 
  movesMsg , 
  battleBeginMoves , 
  WildPokemonOutMsg , 
  changePokemonMsgAttack,
- choosePokemonMsgwhileBattle
+ choosePokemonMsgwhileBattle,
+ makeProperMoveName
  }

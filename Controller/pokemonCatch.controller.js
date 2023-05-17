@@ -19,7 +19,6 @@ async function MyListPokeballs(bot, query) {
   const messageId = query.message.message_id;
   reply_markup = query.message.reply_markup.inline_keyboard;
 
-  console.log(query);
 
   try {
     const inline_pokeBalls = await makeMyPokeBallList(userId)

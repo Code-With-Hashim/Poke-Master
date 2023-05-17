@@ -1,4 +1,5 @@
-const { canHunt } = require("./battle.fnc")
+const { userPokeModal } = require("../model/userPoke")
+const { canHunt, isBattleActive } = require("./battle.fnc")
 
 const usersPokemon = {}
 
@@ -10,6 +11,7 @@ function getBattleWildPokemon (trainerPokemon , opponentPokemon , userId) {
         trainerPokemons : trainerPokemon,
         selectPokemon : trainerPokemon[0],
         teamLoad :  [],
+        allFeint : [],
         previousPokemon : null
     }
     
@@ -47,7 +49,7 @@ function dealtDamage(bot , query ,  botDamage , myDamage , userId , pokeId) {
         
     const selectPokemonId = usersPokemon[userId].selectPokemon.poke_id
     
-    console.log('line : 50', botDamage.Damage , myDamage.Damage)
+    // console.log('line : 50', botDamage.Damage , myDamage.Damage)
     
     usersPokemon[userId].trainerPokemons.forEach((el) => {
         if(el.poke_id === selectPokemonId) {
@@ -57,11 +59,24 @@ function dealtDamage(bot , query ,  botDamage , myDamage , userId , pokeId) {
     
     usersPokemon[userId].wildPokemon.stats.currenthp = usersPokemon[userId].wildPokemon.stats.currenthp - myDamage.Damage
     
-    usersPokemon[userId].trainerPokemons.forEach((el , index) => {
+    usersPokemon[userId].trainerPokemons.forEach((el) => {
         if(el.stats.currenthp <= 0) {
-           el.poke_id = 'feint'
+           el.isFeint = true
         }
     })
+    
+    usersPokemon[userId].trainerPokemons.forEach((el) => {
+        if(el.isFeint) {
+            usersPokemon[userId].allFeint.forEach((ele , index ) => {
+                if(ele === el.poke_id) {
+                    usersPokemon[userId].allFeint.splice(index , 1)
+                }
+            })
+            usersPokemon[userId].allFeint.push(el.poke_id)
+            
+        }
+    })
+    
     
     
 }
@@ -96,9 +111,18 @@ function getPokemonMoves(selectPokemon)  {
 }
 
 function getWildPokemon(userId) {
+    
     const wildPokemon = usersPokemon[userId].wildPokemon
     
     return wildPokemon
+}
+
+function getPokemonTrainerList(userId) {
+    console.log(usersPokemon[userId])
+    const trainerPokemons = usersPokemon[userId].trainerPokemons
+
+    
+    return trainerPokemons
 }
 
 async function myPokemonTeam(bot , query , message) {
@@ -110,8 +134,7 @@ async function myPokemonTeam(bot , query , message) {
     
     
     const inline_team = getPokemonTeam(userId)
-        
-       !canHunt(userId) && bot.editMessageText(message , {
+       isBattleActive(userId) && bot.editMessageText(message , {
             chat_id : chatId,
             message_id : messageId,
             parse_mode : 'HTML'
@@ -124,6 +147,7 @@ async function myPokemonTeam(bot , query , message) {
 
 
 }
+
 
 function getPokemonTeam(userId) {
     const numRows = 3; // Number of rows
@@ -138,8 +162,8 @@ function getPokemonTeam(userId) {
             if (count < usersPokemon[userId].trainerPokemons.length) {
                 const pokemon = usersPokemon[userId].trainerPokemons[count];
                 row.push({
-                    text: pokemon.poke_id === 'feint' ? " " : pokemon.nickname ? makeProperName(pokemon.nickname) : makeProperName(pokemon.name),
-                    callback_data: pokemon.poke_id === 'feint' ? 'feint' : `changepokemon ${pokemon.poke_id}`
+                    text: pokemon.isFeint ? " " : pokemon.nickname ? makeProperName(pokemon.nickname) : makeProperName(pokemon.name),
+                    callback_data: pokemon.isFeint ? 'feint' : `changepokemon ${pokemon.poke_id}`
                 });
             } else {
                 row.push({
@@ -169,6 +193,55 @@ function getCurrentPokemon(userId) {
     return currentPokemon
 }
 
+// userId , mypokeId , myPokeLvl , myPokecurrentExp , newMoves+
+
+function getGainPokeExp(userId , pokeId , newLevel , gainExp , newMoves) {
+    
+   if(pokeId !== 'wild') {     
+    usersPokemon[userId].trainerPokemons.forEach(async(el) => {
+        if(el.poke_id === pokeId) {
+            el.experience = gainExp
+            el.level = newLevel,
+            el.moves = newMoves    
+            userPokeModal.findByIdAndUpdate({_id : el.poke_id} , {...el }, {new : true}).then(() => console.log("Update thing"))
+        }
+    })
+    } else {
+        usersPokemon[userId].wildPokemon.experience = gainExp
+        usersPokemon[userId].wildPokemon.level = newLevel
+        usersPokemon[userId].wildPokemon.moves = newMoves
+    }
+    
+}
+
+function isAllTeamFaint(userId) {
+    
+    console.log('line : 217' , usersPokemon[userId].allFeint)
+    
+    if(usersPokemon[userId].allFeint.length === usersPokemon[userId].trainerPokemons.length) {
+        return true
+    }
+    
+    
+}
+
+
+function gainEvsWild(userId , wildPokemon) {
+    usersPokemon[userId].wildPokemon = {...wildPokemon}
+}
+
+function gainEVstrainer(userId , currentPokemon) {
+    const poke_id = currentPokemon.poke_id
+    
+    usersPokemon[userId].trainerPokemons.forEach(el => {
+        if(el.poke_id === poke_id) {
+            el.ev = {...currentPokemon.ev}
+      
+             userPokeModal.findByIdAndUpdate({_id : el.poke_id} , {...el}, {new : true}).then(() => console.log("Update EV Successfully"))
+        }
+    })
+    
+}
 
 module.exports = {previousPokemonname , 
 getBattleWildPokemon , 
@@ -179,5 +252,10 @@ getWildPokemon ,
 getPokemonTeam , 
 makeProperName , 
 myPokemonTeam,
-getCurrentPokemon
+getCurrentPokemon,
+getPokemonTrainerList,
+getGainPokeExp,
+isAllTeamFaint,
+gainEvsWild,
+gainEVstrainer
 }

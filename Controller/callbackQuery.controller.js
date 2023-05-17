@@ -4,10 +4,6 @@ async function megaStones(bot, query) {
   const chatId = query.message.chat.id;
   const userId = query.from.id
 
-  
-  // console.log(userId)
-  
-
 
   // bot.editMessageText("Not equipped", { chat_id: chat_id, message_id: message_id });
   // bot.editMessageReplyMarkup({ inline_keyboard: [] }, { chat_id: chat_id, message_id: message_id });
@@ -16,7 +12,6 @@ async function megaStones(bot, query) {
       owner: userId,
     });
 
-    // console.log(megaRingisEquipped)
   let message = `<b>Mega Ring</b>: ${!megaRingisEquipped ? "Not Equipped" : "Equipped"}`
     
     if(megaStones.length !== 0) {
