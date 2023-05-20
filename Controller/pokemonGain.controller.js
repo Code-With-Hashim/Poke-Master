@@ -1,5 +1,7 @@
 const axios = require("axios");
 const { makeProperMoveName } = require("../Message Format/BattleMsg");
+const { userPokeModal } = require("../model/userPoke");
+const { getEvolutionDetails } = require("./pokeEvolve.controller");
 const {
   getCurrentPokemon,
   getGainPokeExp,
@@ -22,6 +24,8 @@ const gainExpwithWildPokemon = async (bot , query ,  wildPokemon, userId) => {
   const mypokeId = selectPokemon.poke_id;
   const myPokemon = selectPokemon.name;
   const myPokeMove = selectPokemon.moves;
+  const readyToEvolve = selectPokemon.isReadytoEvolve.evolve_level
+  const isEvolve = selectPokemon.isReadytoEvolve.ready
   const myexperienceGained = experienceGain(
     WildbaseExp,
     wildPokemonlevel,
@@ -53,14 +57,24 @@ const gainExpwithWildPokemon = async (bot , query ,  wildPokemon, userId) => {
      })
      })
      
-     
    }
 
 
-
   myPokeMove.push(...uniqueMoves);
+  
+  if(!isEvolve) {
+    if(myPokeLvl >= readyToEvolve) {
+       bot.sendMessage(query.message.chat.id , `Lv. ${readyToEvolve} <b>${makeProperName(myPokemon)}</b> is ready to evolve` , {
+      parse_mode : 'HTML'
+    })
+    console.log(mypokeId)
+    await userPokeModal.findByIdAndUpdate({_id : mypokeId} , { "isReadytoEvolve.ready": true },
+  { new: true }).then(res => console.log('line :70' , res))
+  .catch(err => console.log('line :71' , err))
+    } 
+  }
 
-  getGainPokeExp(userId, mypokeId, myPokeLvl, myPokecurrentExp, myPokeMove);
+  getGainPokeExp(userId, mypokeId, myPokeLvl, myPokecurrentExp, myPokeMove ,);
 };
 
 const wildExperienceGained = async (wildPokemon, userId) => {
@@ -94,6 +108,7 @@ const wildExperienceGained = async (wildPokemon, userId) => {
     wildPokemon.moves
   );
 };
+
 
 const experienceGain = (baseExp, wildPokemonlevel, partySize) => {
   return Math.floor((1 * 1 * baseExp * wildPokemonlevel) / (7 * partySize));
@@ -182,6 +197,8 @@ const getEvs = async (pokeName) => {
     console.log(err);
   }
 };
+
+getEvolutionDetails('charmander')
 
 function makeBaseStateProperName(statName) {
   let [first , second] = statName.trim().split("-")

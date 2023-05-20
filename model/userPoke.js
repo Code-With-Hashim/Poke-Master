@@ -10,6 +10,8 @@ const MoveSchema = new mongoose.Schema({
 
 const userPokeSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  image : {type : String , required : true},
+  isShiny : {type : String , default : false},
   nickname : String,
   type: { type: [String], required: true },
   level: { type: Number, required: true },
@@ -56,6 +58,11 @@ const userPokeSchema = new mongoose.Schema({
     specialAttack: { type: Number, default: 0 },
     specialDefense: { type: Number, default: 0 },
     speed: { type: Number, default: 0 },
+  },
+  isReadytoEvolve : {
+    evolve_level : {type : Number , required : true},
+    evolve_to : {type : String , required : true},
+    ready : {type : Boolean , default : false}
   },
   group : {type : Number},
   experience: { type: Number, required: true },

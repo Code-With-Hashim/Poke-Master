@@ -123,7 +123,6 @@ async function pokemonCatch(bot, query) {
     );
 
     // makeAuserBallName(usePokeBall)
-    console.log(userId);
     userInvModal
       .updateOne(
         { owner: userId, "pokeBalls.name": makeAuserBallName(usePokeBall) },
@@ -177,8 +176,6 @@ async function pokemonCatch(bot, query) {
 
 function makeAuserBallName(useBall) {
   const ballName = useBall.trim().split("-").join(" ");
-
-  console.log(ballName);
   return ballName;
 }
 
@@ -190,7 +187,6 @@ function calculateThrowTime() {
 
 function isPokemonCaught(calculatedCatchRate) {
   const randomValue = Math.random() * 100; // Generate a random number between 0 and 100
-  console.log(randomValue, calculatedCatchRate);
   return randomValue <= calculatedCatchRate; // Compare the random value with the calculated catch rate
 }
 

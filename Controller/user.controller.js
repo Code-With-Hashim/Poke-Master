@@ -2,6 +2,7 @@ const axios = require("axios");
 const { userModel } = require("../model/userDetail");
 const { userInvModal } = require("../model/userInventory");
 const { userPokeModal } = require("../model/userPoke");
+const { getEvolutionDetails } = require("./pokeEvolve.controller");
 
 const starterPack = [
   {
@@ -34,6 +35,9 @@ async function choosePokemon(bot, query) {
     const types = pokeDetail.data.types;
     const abilities = pokeDetail.data.abilities;
     const stats = pokeDetail.data.stats;
+    const image = pokeDetail.data.sprites.other["official-artwork"].front_default
+    
+    const pokeEvolveDetail = await getEvolutionDetails(pokemonName)
 
     const pokeLvl = 5;
     const pokeTypes = getTypes(types);
@@ -52,6 +56,7 @@ async function choosePokemon(bot, query) {
 
     const isDataEntrySucceed = await userPokeModal.create({
       name: pokemonName,
+      image,
       abilities: pokeAbilities,
       baseStats: pokeBaseStats,
       experience: pokeExp.totalExp,
@@ -62,6 +67,7 @@ async function choosePokemon(bot, query) {
       type: pokeTypes,
       group : 1,
       trainer,
+      isReadytoEvolve : !pokeEvolveDetail ? null : pokeEvolveDetail
     });
 
     if (isDataEntrySucceed) {

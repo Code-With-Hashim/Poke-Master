@@ -24,9 +24,11 @@ const {
   previousPokemonname,
   myPokemonTeam,
   isAllTeamFaint,
+  getCurrentPokemon,
 } = require("./pokemon.controller");
 const { battleBeginMsg, fledPokemonMsg, movesMsg, battleBeginMoves, WildPokemonOutMsg, changePokemonMsgAttack, choosePokemonMsgwhileBattle, allTeamFaint } = require("../Message Format/BattleMsg");
 const { gainExpwithWildPokemon, wildExperienceGained, gainEvs } = require("./pokemonGain.controller");
+const { getEvolutionDetails } = require("./pokeEvolve.controller");
 
 
 const baseStats = [
@@ -58,7 +60,8 @@ async function battle(bot, query) {
   const userId = query.from.id;
   const pokemonName = query.data.trim().split(" ")[1];
   const pokeLvl = query.data.trim().split(" ").map(Number)[2];
-          
+  const isShiny = query.data.trim().split(" ")[3]
+
   
   
   try {
@@ -74,7 +77,8 @@ async function battle(bot, query) {
       const opponentPokemon = await getOpponentPokemon(
         pokeDetail,
         pokeLvl,
-        pokemonName
+        pokemonName,
+        isShiny == 'true'
       );
       const trainerPokemon = await getTrainerPokemon(userId);
       const pokeBattleDetail = getBattleWildPokemon(
@@ -158,9 +162,10 @@ async function battleBeginFight(bot, query, command, pokeId) {
   const wildPokemon = getWildPokemon(userId);
   const trainerBattlePokemon = selectPokemon(userId, pokeId);
   
+  
  
 
-  if (pokeId) {
+  if (command === 'changePokemon') {
     bot.answerCallbackQuery(query.id , `Go ${makeProperName(trainerBattlePokemon.name)}`)
     Prevkeyboard = getPokemonMoves(trainerBattlePokemon.moves);
   }
@@ -186,7 +191,7 @@ async function battleBeginFight(bot, query, command, pokeId) {
 
     let myDamage =
       command !== "catchPokemon" &&
-      !pokeId &&
+      !pokeId && command !== 'run' &&
       (await calculateDamage(
         trainerBattlePokemon,
         wildPokemon,
@@ -200,7 +205,7 @@ async function battleBeginFight(bot, query, command, pokeId) {
       botMoveType
     );
 
-    if(command !== 'catchPokemon' && command !== 'changePokemon') {
+    if(command !== 'catchPokemon' && command !== 'changePokemon' && command !== 'run') {
        dealtDamage(bot, query, botDamage, myDamage, userId, pokeId);
     }
 
@@ -222,7 +227,7 @@ async function battleBeginFight(bot, query, command, pokeId) {
     //   myDamage.message = randomMsg[val];
     // }
 
-    if (command === "changePokemon" || command === 'catchPokemon' && previousPokemonname(userId).currenthp > 0) {
+    if (command === "changePokemon" || command === 'catchPokemon' || command === 'run' && previousPokemonname(userId).currenthp > 0) {
         dealtDamage(bot, query, botDamage, { Damage: 0 }, userId, pokeId);
         
     } else if (command === "changePokemon"  && previousPokemonname(userId).currenthp <= 0) {
@@ -252,7 +257,7 @@ async function battleBeginFight(bot, query, command, pokeId) {
     }
     if (wildPokemon.stats.currenthp <= 0) {
       wildPokemon.stats.currenthp = 0;
-      gainExpwithWildPokemon(wildPokemon ,  userId)
+     gainExpwithWildPokemon(bot , query , wildPokemon ,  userId)
        gainEvs(wildPokemon , userId , 'win')
     }
     
@@ -276,7 +281,7 @@ async function battleBeginFight(bot, query, command, pokeId) {
     }
 
 
-    if (command !== "catchPokemon" && command !== "changePokemon") {
+    if (command !== "catchPokemon" && command !== "changePokemon" && command !== 'run') {
     let myDamageMsg = WildPokemonOutMsg({myDamage , moveName , trainerBattlePokemon , wildPokemon , userId})
       
       await bot
@@ -410,7 +415,8 @@ async function getTrainerPokemon(userId) {
       moves: pokeMoves,
       ev : pokeEVs,
       iv : pokeIVs,
-      experience :  experience
+      experience :  experience,
+      isReadytoEvolve : pokes.isReadytoEvolve
     };
     return myPokemon;
   });
@@ -418,7 +424,7 @@ async function getTrainerPokemon(userId) {
   return myTeamArray;
 }
 
-async function getOpponentPokemon(pokeDetail, pokeLvl, pokemonName) {
+async function getOpponentPokemon(pokeDetail, pokeLvl, pokemonName , isShiny) {
   const moves = pokeDetail.data.moves;
   const types = pokeDetail.data.types;
   const abilities = pokeDetail.data.abilities;
@@ -440,9 +446,13 @@ async function getOpponentPokemon(pokeDetail, pokeLvl, pokemonName) {
       pokeLvl,
       pokeNat
     );
+    
+    const pokeEvolve = await getEvolutionDetails(pokemonName)
 
     return {
       name: pokemonName,
+      image : isShiny ? pokeDetail.data.sprites.other["official-artwork"].front_shiny
+      : pokeDetail.data.sprites.other["official-artwork"].front_default,
       level: pokeLvl,
       iv: pokeIVs,
       ev: pokeEVs,
@@ -453,6 +463,8 @@ async function getOpponentPokemon(pokeDetail, pokeLvl, pokemonName) {
       type: pokeTypes,
       stats: mainStats,
       moves: pokeMoves,
+      isShiny,
+      isReadytoEvolve : pokeEvolve
     };
   } catch (err) {
     console.log(err);
@@ -515,8 +527,18 @@ function gameExitinBattle(bot , query) {
    
     if(randomBoolean) {
       bot.answerCallbackQuery(query.id , 'Failed to escape')
+      bot.editMessageText(`${makeProperName(getWildPokemon(query.from.id).name)} is attacking...` , {
+        chat_id : query.message.chat.id,
+        message_id : query.message.message_id
+      })
+      battleBeginFight(bot , query , 'run')
     } else {
       bot.answerCallbackQuery(query.id , 'You go away safely')
+      bot.editMessageText(`You escaped from the wild ${makeProperName(getWildPokemon(query.from.id).name)}.` , {
+        chat_id : query.message.chat.id ,
+        message_id : query.message.message_id
+      })
+      endBattle(query.from.id)
     }
     
     return randomBoolean
