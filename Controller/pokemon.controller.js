@@ -82,23 +82,27 @@ function dealtDamage(bot , query ,  botDamage , myDamage , userId , pokeId) {
 }
 
 function getPokemonMoves(selectPokemon)  {
-    const moves_list = []
-    
-    let move = []
+    const moves_list = [
+        [],
+        []
+    ]
     selectPokemon.forEach(ele => {
          let [first, second] = ele.name.split("-");
           first = first.charAt(0).toUpperCase() + first.slice(1);
           const text = `${second ? first + " " + second : first}`;
           const callback_data = `fight ${ele.power} ${ele.type} ${ele.accuracy} ${text}`;
           
-          move.push({
+          if (moves_list[0].length !== 2) {
+            moves_list[0].push({
             text,
             callback_data,
           });
-          if (move.length % 2 === 0) {
-            moves_list.push(move);
-            move = [];
-          }
+          } else if(moves_list[1].length !== 2) {
+            moves_list[1].push({
+            text,
+            callback_data,
+          }); 
+           }
     })
     
     moves_list.push([
@@ -118,7 +122,6 @@ function getWildPokemon(userId) {
 }
 
 function getPokemonTrainerList(userId) {
-    console.log(usersPokemon[userId])
     const trainerPokemons = usersPokemon[userId].trainerPokemons
 
     
@@ -197,13 +200,17 @@ function getCurrentPokemon(userId) {
 
 function getGainPokeExp(userId , pokeId , newLevel , gainExp , newMoves) {
     
+    
    if(pokeId !== 'wild') {     
     usersPokemon[userId].trainerPokemons.forEach(async(el) => {
         if(el.poke_id === pokeId) {
-            el.experience = gainExp
-            el.level = newLevel,
-            el.moves = newMoves    
-            userPokeModal.findByIdAndUpdate({_id : el.poke_id} , {...el }, {new : true}).then(() => console.log("Update thing"))
+             const newUpdate = {
+               experience :  el.experience = gainExp,
+            level : el.level = newLevel,
+            moves : el.moves = newMoves
+             } 
+            
+            userPokeModal.findByIdAndUpdate({_id : el.poke_id} , {...newUpdate}, {new : true}).then(() => console.log("Update thing"))
         }
     })
     } else {

@@ -26,14 +26,16 @@ const fetchPokemonDetail = async (pokeId, typePokemon, bot, msg) => {
     {
       reply_to_message_id: msg.message_id,
       caption: `A wild <b>${name}</b> (Lv. ${level}) has appeared`,
-      ...evYieldoptions(pokeDetail.data , level),
+      ...evYieldoptions(pokeDetail.data , level , typePokemon , typePokemon == "shiny"
+      ? pokeDetail.data.sprites.other["official-artwork"].front_shiny
+      : pokeDetail.data.sprites.other["official-artwork"].front_default,),
       parse_mode: "HTML",
     }
   );
 
 };
 
-function evYieldoptions(res , lvl) {
+function evYieldoptions(res , lvl , typePokemon , image) {
   const ev_point = [];
 
   for (let i = 0; i < res.stats.length; i++) {
@@ -53,7 +55,7 @@ function evYieldoptions(res , lvl) {
     reply_markup: JSON.stringify({
       inline_keyboard: [
         [
-          { text: "Battle", callback_data: `battle ${res && res.name} ${lvl}` },
+          { text: "Battle", callback_data: `battle ${res && res.name} ${lvl} ${typePokemon === 'shiny' ? true : false}` },
           {
             text: "EV Yield",
             callback_data: `ev_yield ${ev_yield}`,

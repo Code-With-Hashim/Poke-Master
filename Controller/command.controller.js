@@ -11,6 +11,7 @@ const {
   getLegendryPokemon,
   getRarePokemon,
 } = require("./controller");
+const { suggestPokemon } = require("./evolve.controller");
 const { myPokemonTeam, changeBattlePokemon } = require("./myBattlePokemon.controller");
 const { mypokeballs, pokeBack, catchPokemon, MyListPokeballs, pokemonCatch } = require("./pokemonCatch.controller");
 const {
@@ -117,14 +118,17 @@ function callbackQuery(bot, query) {
   const option = query.data.trim().split(" ")[0];
 
   // Create a message with the text you want to display in the modal
-  // console.log(option)
+  // console.log(option
   
-
 
   switch (option) {
     
     case 'changepokemon' : {
       changeBattlePokemon(bot , query)
+      break
+    } 
+    case 'suggest' : {
+      suggestPokemon(bot , query)
       break
     }
     case 'game_left' : {
@@ -167,18 +171,15 @@ function callbackQuery(bot, query) {
       break;
     }
     case "mymegastones": {
-      console.log("megaStones");
       megaStones(bot, query);
       break;
     }
     case "myinventory": {
       inventory(bot, query);
-      console.log("inventory");
       break;
     }
     case "mytm": {
       TM(bot, query);
-      console.log("tms");
       break;
     }
     case "items": {
