@@ -28,7 +28,7 @@ bot.onText(/\/give/ , (msg , match) => userGivePokeDollar(bot , msg , match))
 
 bot.onText(/\/evolve/ , (msg , match) => evolveCommand(bot , msg , match))
 
-
+bot.onText(/\/evolve/ , (msg , match) => nickNameCommand(bot , msg , match))
 
 bot.on("callback_query", (query) => callbackQuery(bot , query));
 
