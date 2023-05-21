@@ -11,7 +11,7 @@ const {
   getLegendryPokemon,
   getRarePokemon,
 } = require("./controller");
-const { suggestPokemon } = require("./evolve.controller");
+const { suggestPokemon, evolvePokemon } = require("./evolve.controller");
 const { myPokemonTeam, changeBattlePokemon } = require("./myBattlePokemon.controller");
 const { mypokeballs, pokeBack, catchPokemon, MyListPokeballs, pokemonCatch } = require("./pokemonCatch.controller");
 const {
@@ -127,6 +127,10 @@ function callbackQuery(bot, query) {
       changeBattlePokemon(bot , query)
       break
     } 
+    case 'evolve' : {
+      evolvePokemon(bot , query)
+      break
+    }
     case 'suggest' : {
       suggestPokemon(bot , query)
       break

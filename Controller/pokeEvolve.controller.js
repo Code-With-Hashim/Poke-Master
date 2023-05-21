@@ -1,6 +1,7 @@
 const axios = require('axios')
 
 async function getEvolutionDetails(pokemonName) {
+  console.log('line4', pokemonName)
   try {
     // Fetch the Pokemon data from the Pokémon API
     const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`);
@@ -21,6 +22,10 @@ async function getEvolutionDetails(pokemonName) {
      }
     } else {
       console.log(`${pokemonName} does not evolve.`);
+      return {
+        evolve_level : 100,
+        evolve_to : 'null'
+      }
     }
   } catch (error) {
     console.error(`Error: ${error.message}`);

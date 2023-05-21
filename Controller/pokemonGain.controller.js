@@ -198,7 +198,6 @@ const getEvs = async (pokeName) => {
   }
 };
 
-getEvolutionDetails('charmander')
 
 function makeBaseStateProperName(statName) {
   let [first , second] = statName.trim().split("-")

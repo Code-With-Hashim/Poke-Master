@@ -60,7 +60,7 @@ const userPokeSchema = new mongoose.Schema({
     speed: { type: Number, default: 0 },
   },
   isReadytoEvolve : {
-    evolve_level : {type : Number , required : true},
+    evolve_level : {type : Number, required : true},
     evolve_to : {type : String , required : true},
     ready : {type : Boolean , default : false}
   },
